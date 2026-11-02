@@ -25,6 +25,25 @@ Supports public and private repos. Private access goes through GitHub's normal p
 - Celery + Redis
 - Docker
 
+## Run locally
+
+1. Install and start [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. Copy the example env file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. From the project root, build and start everything:
+
+   ```bash
+   docker compose up --build
+   ```
+
+4. Open [http://localhost:8000/health/](http://localhost:8000/health/) — you should see `{"status": "ok", "service": "the-lockfile"}`.
+
+Stop with `Ctrl+C`, or run in the background with `docker compose up --build -d` and stop later with `docker compose down`.
+
 ## License
 
 Source-available. Free for individuals, open-source projects, non-profits, education, and companies with fewer than 10 employees.
