@@ -1,0 +1,43 @@
+The Lockfile License
+Copyright (c) 2026 The Lockfile
+
+This software is source-available. You may use it under the terms below.
+
+
+1. Free use
+
+You may use, copy, modify, and run this software for free if you are:
+
+  - an individual (personal projects, learning, research)
+  - a non-profit or educational institution
+  - an open-source project
+  - a company with fewer than 10 employees, for internal use only
+
+You may also fork and contribute changes back to this project.
+
+
+2. Enterprise / commercial use
+
+If you are a company with 10 or more employees, or you want to offer
+The Lockfile as a hosted product, paid service, or commercial offering
+to others, you need a commercial license.
+
+Contact: https://thelockfile.dev
+
+
+3. What you cannot do without a commercial license
+
+  - Use this software at a company with 50+ employees
+  - Sell, host, or redistribute this software as a commercial product
+    or service
+  - Remove or alter this license notice
+
+
+4. Disclaimer
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM
+THE USE OF THIS SOFTWARE.

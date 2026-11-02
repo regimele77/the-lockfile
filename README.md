@@ -8,7 +8,7 @@ Self-hosted open-source software security platform.
 
 ## What it does
 
-The Lockfile scans your GitHub repositories for security problems — insecure configs, missing security practices, vulnerable dependencies, exposed secrets, and weak spots in your development workflow.
+The Lockfile scans your GitHub repositories for security problems, insecure configs, missing security practices, vulnerable dependencies, exposed secrets, and weak spots in your development workflow.
 
 Findings come with clear explanations and recommendations, so you don't need to be a security expert to act on them.
 
@@ -25,10 +25,10 @@ Supports public and private repos. Private access goes through GitHub's normal p
 - Celery + Redis
 - Docker
 
-## Status
-
-Early days. The long-term goal is a community-driven tool that fits into existing workflows — GitHub, automated scans, APIs, and CI/CD.
-
 ## License
 
-Open source. License TBD.
+Source-available. Free for individuals, open-source projects, non-profits, education, and companies with fewer than 10 employees.
+
+Larger companies and anyone offering The Lockfile as a commercial product or hosted service need a commercial license — contact via [thelockfile.dev](https://thelockfile.dev).
+
+See [LICENSE](LICENSE) for the full terms.
