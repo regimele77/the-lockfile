@@ -3,4 +3,5 @@ psycopg[binary]>=3.2,<4
 celery[redis]>=5.4,<6
 redis>=5.2,<6
 django-environ>=0.11,<1
+django-htmx>=1.21,<2
 gunicorn>=23.0,<24

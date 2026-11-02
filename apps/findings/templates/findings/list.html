@@ -1,0 +1,11 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Findings{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Findings" subtitle="Security findings across all scans. Filter by severity — tabs swap via HTMX." %}
+
+<div id="findings-panel">
+  {% include "findings/partials/filtered.html" %}
+</div>
+{% endblock %}

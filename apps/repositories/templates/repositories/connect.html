@@ -1,0 +1,9 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Connect repository{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Connect a GitHub App" subtitle="Stub screen — real OAuth and installation flow ships in a later milestone." %}
+
+{% include "partials/empty_state.html" with title="GitHub App connection coming soon" description="You'll install The Lockfile GitHub App, grant repository access, and pick which repos to scan. Until then, you can create Repository rows via the Django admin for UI exploration." action_url="/admin/" action_label="Open admin" %}
+{% endblock %}

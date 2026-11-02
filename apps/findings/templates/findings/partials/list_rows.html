@@ -1,0 +1,31 @@
+{% load lockfile_tags %}
+
+{% if findings %}
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Severity</th>
+          <th scope="col">Title</th>
+          <th scope="col">Category</th>
+          <th scope="col">Repository</th>
+          <th scope="col">File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for finding in findings %}
+          <tr>
+            <td>{% severity_badge finding.severity %}</td>
+            <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
+            <td class="text-ink-muted">{{ finding.get_category_display }}</td>
+            <td class="text-ink-muted">{{ finding.scan.repository.full_name }}</td>
+            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "—" %}</td>
+          </tr>
+        {% empty %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  {% include "partials/empty_state.html" with title="No findings yet" description="Findings appear after a scan completes. Connect repositories and run a scan to populate this list." action_url="/repositories/connect/" action_label="Connect a repository" %}
+{% endif %}

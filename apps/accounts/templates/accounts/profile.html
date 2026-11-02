@@ -1,0 +1,23 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Settings" subtitle="Profile and instance preferences. GitHub App and org settings will live here." %}
+
+<div class="border border-line bg-surface p-4">
+  <dl class="space-y-3 text-sm">
+    <div>
+      <dt class="text-ink-faint">Username</dt>
+      <dd class="mt-1 text-ink">{{ user.get_username }}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Email</dt>
+      <dd class="mt-1 text-ink">{% firstof user.email "Not set" %}</dd>
+    </div>
+  </dl>
+  <p class="mt-5 border-t border-line pt-3 text-sm text-ink-muted">
+    GitHub App connection, notification preferences, and license status are stubs for a later release.
+  </p>
+</div>
+{% endblock %}

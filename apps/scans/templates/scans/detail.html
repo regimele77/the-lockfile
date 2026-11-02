@@ -1,0 +1,48 @@
+{% extends "layouts/app.html" %}
+{% load lockfile_tags %}
+
+{% block title %}Scan #{{ scan.pk }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <p class="mb-1 text-xs text-ink-faint">Scan</p>
+    <h1 class="font-display text-2xl text-ink sm:text-3xl">Scan #{{ scan.pk }}</h1>
+    <p class="mt-1 text-sm text-ink-muted">
+      <a href="{% url 'repositories:detail' scan.repository_id %}">{{ scan.repository.full_name }}</a>
+    </p>
+  </div>
+  {% status_badge scan.status %}
+</div>
+
+<dl class="mb-8 grid gap-4 border border-line bg-surface p-4 text-sm sm:grid-cols-3">
+  <div>
+    <dt class="text-ink-faint">Created</dt>
+    <dd class="mt-1">{{ scan.created_at|date:"M j, Y H:i" }}</dd>
+  </div>
+  <div>
+    <dt class="text-ink-faint">Started</dt>
+    <dd class="mt-1">{% if scan.started_at %}{{ scan.started_at|date:"M j, Y H:i" }}{% else %}—{% endif %}</dd>
+  </div>
+  <div>
+    <dt class="text-ink-faint">Finished</dt>
+    <dd class="mt-1">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, Y H:i" }}{% else %}—{% endif %}</dd>
+  </div>
+</dl>
+
+{% with findings=scan.findings.all %}
+  {% if findings %}
+    <h2 class="mb-3 font-display text-lg">Findings in this scan</h2>
+    <ul class="border border-line bg-surface">
+      {% for finding in findings %}
+        <li class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-2 last:border-b-0">
+          <a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a>
+          {% severity_badge finding.severity %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    {% include "partials/empty_state.html" with title="No findings for this scan" description="When scanners are connected, results will list here with severity and remediation guidance." %}
+  {% endif %}
+{% endwith %}
+{% endblock %}

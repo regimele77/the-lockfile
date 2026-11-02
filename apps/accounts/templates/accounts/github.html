@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Connect with GitHub{% endblock %}
+
+{% block content %}
+<section class="site-wrap py-14 sm:py-20">
+  <h1 class="font-display text-3xl text-ink">Connect with GitHub</h1>
+  <div class="mt-8 border border-line bg-surface p-4 text-sm text-ink-muted">
+    <p class="text-ink">Coming soon</p>
+    <p class="mt-2">
+      GitHub App OAuth and installation are not wired up yet. Until then you can
+      explore the product shell via the Django admin after creating a local
+      superuser for development only.
+    </p>
+  </div>
+  <div class="mt-8 flex flex-wrap gap-3">
+    <a href="{% url 'repositories:connect' %}" class="btn-primary">Repository connect stub</a>
+    <a href="{% url 'core:landing' %}" class="btn-secondary">Back to home</a>
+  </div>
+</section>
+{% endblock %}

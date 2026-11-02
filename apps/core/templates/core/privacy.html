@@ -1,0 +1,61 @@
+{% extends "core/legal_base.html" %}
+
+{% block title %}Privacy{% endblock %}
+{% block page_title %}Privacy{% endblock %}
+{% block page_lede %}
+<p class="mt-2 text-sm text-ink-muted">
+  How The Lockfile handles data on a self-hosted instance. This is a product stub,
+  not formal legal advice.
+</p>
+{% endblock %}
+
+{% block legal_body %}
+<section>
+  <h2 class="font-display text-lg text-ink">Self-hosted by design</h2>
+  <p class="mt-2">
+    The Lockfile is meant to run on infrastructure you control. Repository contents,
+    scan results, findings, and account data stay with your deployment unless you
+    choose to send them elsewhere.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">What this instance may store</h2>
+  <ul class="mt-2 list-disc space-y-1 pl-5">
+    <li>Account credentials and session data for people who sign in</li>
+    <li>Repository metadata you connect (names, IDs, visibility)</li>
+    <li>Scan jobs and findings produced by scanners</li>
+    <li>Operational logs written by Django, Celery, and your host</li>
+  </ul>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">GitHub access</h2>
+  <p class="mt-2">
+    When a GitHub App is connected, access follows GitHub's normal permission model
+    for the installation you approve. The Lockfile does not require sending repo
+    data to thelockfile.com to function.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">Cookies and sessions</h2>
+  <p class="mt-2">
+    Signed-in use relies on session cookies for authentication. There is no third-party
+    advertising tracker in this application shell.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">Operators</h2>
+  <p class="mt-2">
+    Whoever runs this instance is responsible for their own retention, access control,
+    backups, and disclosure practices. Update this page for your organization as needed.
+  </p>
+</section>
+
+<p class="border-t border-line pt-4 text-xs text-ink-faint">
+  Last updated: placeholder · Contact via
+  <a href="https://thelockfile.com">thelockfile.com</a>
+</p>
+{% endblock %}

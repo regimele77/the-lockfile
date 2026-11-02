@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load lockfile_tags %}
+
+{% block body_class %}app-shell{% endblock %}
+
+{% block body %}
+<div class="min-h-screen lg:grid lg:grid-cols-[200px_1fr]">
+  <aside class="border-b border-line bg-surface lg:border-b-0 lg:border-r">
+    <div class="flex items-center justify-between gap-3 px-3 py-3 lg:px-4">
+      <a href="{% url 'dashboard:home' %}" class="flex items-center gap-2 text-ink no-underline hover:no-underline">
+        {% lockfile_mark %}
+        <span class="font-display text-lg text-ink">The Lockfile</span>
+      </a>
+      <button type="button" class="btn-ghost px-2 py-1 lg:hidden" aria-controls="app-nav" aria-expanded="false" data-nav-toggle>
+        Menu
+      </button>
+    </div>
+    <nav id="app-nav" class="hidden flex-col gap-0.5 px-2 pb-4 lg:flex" aria-label="Product">
+      <a class="app-nav-link {% nav_active request 'dashboard:home' 'dashboard:stats_partial' %}" href="{% url 'dashboard:home' %}">Dashboard</a>
+      <a class="app-nav-link {% nav_active request 'repositories:list' 'repositories:detail' 'repositories:connect' %}" href="{% url 'repositories:list' %}">Repositories</a>
+      <a class="app-nav-link {% nav_active request 'scans:list' 'scans:detail' %}" href="{% url 'scans:list' %}">Scans</a>
+      <a class="app-nav-link {% nav_active request 'findings:list' 'findings:detail' %}" href="{% url 'findings:list' %}">Findings</a>
+      <a class="app-nav-link" href="{% url 'accounts:profile' %}">Settings</a>
+      <div class="my-2 border-t border-line"></div>
+      <a class="app-nav-link" href="{% url 'core:landing' %}">Marketing site</a>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="app-nav-link w-full text-left">Log out</button>
+      </form>
+    </nav>
+  </aside>
+
+  <div class="flex min-w-0 flex-col">
+    <header class="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2 sm:px-6">
+      <p class="truncate text-sm text-ink-muted">
+        {% if user.is_authenticated %}
+          Signed in as <span class="text-ink">{{ user.get_username }}</span>
+        {% endif %}
+      </p>
+      <a href="{% url 'accounts:profile' %}" class="text-sm">Profile</a>
+    </header>
+
+    {% include "partials/flash_messages.html" %}
+
+    <main id="main" class="flex-1 px-4 py-5 sm:px-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const toggle = document.querySelector("[data-nav-toggle]");
+    const nav = document.getElementById("app-nav");
+    if (!toggle || !nav) return;
+    toggle.addEventListener("click", function () {
+      const open = nav.classList.toggle("hidden") === false;
+      nav.classList.toggle("flex", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  })();
+</script>
+{% endblock %}

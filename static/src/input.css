@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+@source "../../templates/**/*.html";
+@source "../../apps/**/templates/**/*.html";
+
+/* ------------------------------------------------------------------
+   The Lockfile — plain, slightly older institutional look.
+   Tahoma throughout (simple system UI face). Consolas for code.
+------------------------------------------------------------------ */
+@theme {
+  --font-display: Tahoma, "Segoe UI", Geneva, sans-serif;
+  --font-sans: Tahoma, "Segoe UI", Geneva, sans-serif;
+  --font-mono: Consolas, "Courier New", Courier, monospace;
+
+  --color-ink: #222222;
+  --color-ink-muted: #555555;
+  --color-ink-faint: #777777;
+  --color-paper: #f7f7f4;
+  --color-paper-deep: #ebebe6;
+  --color-surface: #ffffff;
+  --color-line: #c8c8c0;
+  --color-accent: #1e3a5f;
+  --color-accent-hover: #152a45;
+  --color-accent-soft: #e8eef4;
+  --color-critical: #990000;
+  --color-high: #a04000;
+  --color-medium: #8a6d00;
+  --color-low: #2d5a3d;
+  --color-info: #444444;
+  --color-ok: #2d5a3d;
+  --color-warn: #8a6d00;
+  --color-danger: #990000;
+}
+
+@layer base {
+  :root {
+    --bg: var(--color-paper);
+    --surface: var(--color-surface);
+    --text: var(--color-ink);
+    --text-muted: var(--color-ink-muted);
+    --text-faint: var(--color-ink-faint);
+    --border: var(--color-line);
+    --accent: var(--color-accent);
+    --accent-hover: var(--color-accent-hover);
+    --accent-soft: var(--color-accent-soft);
+    --danger: var(--color-danger);
+    --warn: var(--color-warn);
+    --ok: var(--color-ok);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans;
+    min-height: 100vh;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm no-underline;
+    border-radius: 2px;
+  }
+
+  .btn:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-ghost:hover {
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    @apply border border-accent bg-accent text-white;
+  }
+
+  .btn-primary:hover {
+    @apply border-accent-hover bg-accent-hover text-white;
+  }
+
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink;
+  }
+
+  .btn-secondary:hover {
+    @apply border-accent text-accent;
+  }
+
+  .btn-ghost {
+    @apply border border-transparent bg-transparent text-ink-muted;
+  }
+
+  .btn-ghost:hover {
+    @apply bg-paper-deep text-ink;
+  }
+
+  .field {
+    @apply w-full border border-line bg-surface px-3 py-2 text-sm text-ink
+      placeholder:text-ink-faint;
+    border-radius: 2px;
+  }
+
+  .field:focus {
+    border-color: var(--color-accent);
+    outline: none;
+  }
+
+  .label {
+    @apply mb-1 block text-sm text-ink;
+  }
+
+  .flash,
+  .flash-success,
+  .flash-error,
+  .flash-info,
+  .flash-warning {
+    @apply flex items-start justify-between gap-3 border px-3 py-2 text-sm;
+    border-radius: 2px;
+  }
+
+  .flash-success {
+    @apply border-ok bg-ok/10 text-ok;
+  }
+
+  .flash-error {
+    @apply border-danger bg-danger/10 text-danger;
+  }
+
+  .flash-info {
+    @apply border-accent bg-accent-soft text-accent;
+  }
+
+  .flash-warning {
+    @apply border-warn bg-warn/10 text-warn;
+  }
+
+  .badge-critical,
+  .badge-high,
+  .badge-medium,
+  .badge-low,
+  .badge-info,
+  .status-queued,
+  .status-running,
+  .status-completed,
+  .status-failed {
+    @apply inline-flex items-center border px-1.5 py-0.5 text-xs;
+    border-radius: 2px;
+  }
+
+  .badge-critical {
+    @apply border-critical text-critical;
+  }
+  .badge-high {
+    @apply border-high text-high;
+  }
+  .badge-medium {
+    @apply border-medium text-medium;
+  }
+  .badge-low {
+    @apply border-low text-low;
+  }
+  .badge-info {
+    @apply border-info text-info;
+  }
+
+  .status-queued {
+    @apply border-line text-ink-muted;
+  }
+  .status-running {
+    @apply border-accent text-accent;
+  }
+  .status-completed {
+    @apply border-ok text-ok;
+  }
+  .status-failed {
+    @apply border-danger text-danger;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center border border-line bg-surface px-6 py-12 text-center;
+    border-radius: 2px;
+  }
+
+  .page-header {
+    @apply mb-6 flex flex-col gap-2 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .app-nav-link {
+    @apply flex items-center gap-2 border-l-2 border-transparent px-3 py-1.5 text-sm text-ink no-underline;
+  }
+
+  .app-nav-link:hover {
+    @apply bg-paper-deep text-ink no-underline;
+  }
+
+  .app-nav-link.active {
+    @apply border-accent font-bold text-ink;
+    background: var(--color-accent-soft);
+  }
+
+  .data-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .data-table th {
+    @apply border border-line bg-paper-deep px-3 py-2 text-left text-xs font-normal text-ink;
+  }
+
+  .data-table td {
+    @apply border border-line px-3 py-2 text-ink;
+  }
+
+  .lockfile-mark {
+    @apply h-6 w-6 shrink-0 text-accent;
+  }
+
+  .site-wrap {
+    @apply w-full px-4 sm:px-6 lg:px-8;
+  }
+
+  .site-nav-link {
+    @apply inline-flex shrink-0 items-center px-3 py-2 text-ink-muted no-underline;
+    border-radius: 2px;
+  }
+
+  .site-nav-link:hover {
+    @apply bg-paper-deep text-ink no-underline;
+  }
+
+  .site-nav-link.active {
+    @apply font-bold text-ink;
+    background: var(--color-accent-soft);
+  }
+
+  @media (min-width: 1024px) {
+    .site-header .site-nav {
+      justify-content: flex-start;
+    }
+
+    .site-header .site-nav-link {
+      @apply px-3 py-1.5;
+    }
+  }
+
+  .footer-heading {
+    @apply text-xs font-bold uppercase tracking-wide text-ink;
+  }
+
+  .hero-grid {
+    @apply grid gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-12;
+  }
+
+  .hero-brand {
+    @apply font-display text-4xl text-ink sm:text-5xl;
+  }
+
+  .hero-rule {
+    border: 0;
+    border-top: 3px double var(--color-accent);
+    margin: 1.25rem 0;
+    max-width: 12rem;
+  }
+
+  .hero-headline {
+    @apply font-display text-2xl text-ink sm:text-3xl;
+  }
+
+  .hero-lede {
+    @apply mt-4 text-base leading-relaxed text-ink-muted;
+  }
+
+  .hero-aside {
+    @apply border border-line bg-surface p-4 sm:p-5;
+    border-radius: 2px;
+  }
+
+  .hero-aside-label {
+    @apply mb-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-wide text-ink;
+  }
+
+  .hero-aside-list {
+    @apply space-y-3 text-sm text-ink;
+  }
+
+  .hero-aside-list li {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .section-item {
+    @apply border border-line bg-paper p-4;
+    border-radius: 2px;
+  }
+
+  .legal-prose h2 {
+    @apply text-ink;
+  }
+
+  .legal-prose a {
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,61 @@
+{% extends "core/legal_base.html" %}
+
+{% block title %}Terms{% endblock %}
+{% block page_title %}Terms of use{% endblock %}
+{% block page_lede %}
+<p class="mt-2 text-sm text-ink-muted">
+  High-level terms for using The Lockfile software. See the project
+  <a href="https://thelockfile.com">LICENSE</a> for the binding license text.
+</p>
+{% endblock %}
+
+{% block legal_body %}
+<section>
+  <h2 class="font-display text-lg text-ink">The software</h2>
+  <p class="mt-2">
+    The Lockfile is source-available software for scanning repositories and reviewing
+    security findings on your own infrastructure. Use is governed by the project license.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">License summary</h2>
+  <p class="mt-2">
+    Free for individuals, open-source projects, non-profits, education, and companies
+    with fewer than 10 employees. Larger companies, and anyone offering The Lockfile
+    as a commercial product or hosted service, need a commercial license.
+  </p>
+  <p class="mt-2">
+    Contact via <a href="https://thelockfile.com">thelockfile.com</a> for commercial licensing.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">Your responsibilities</h2>
+  <ul class="mt-2 list-disc space-y-1 pl-5">
+    <li>Only connect repositories and credentials you are authorized to use</li>
+    <li>Keep your instance, secrets, and GitHub App credentials secured</li>
+    <li>Treat scan findings as guidance, not a guarantee of complete security</li>
+  </ul>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">No warranty</h2>
+  <p class="mt-2">
+    The software is provided as-is, without warranty of any kind. Operators and users
+    assume responsibility for how they deploy and rely on scan results.
+  </p>
+</section>
+
+<section>
+  <h2 class="font-display text-lg text-ink">This page</h2>
+  <p class="mt-2">
+    This is a stub for the application shell. Replace or extend it for your deployment
+    if you need organization-specific terms.
+  </p>
+</section>
+
+<p class="border-t border-line pt-4 text-xs text-ink-faint">
+  Last updated: placeholder · Full terms in the project LICENSE
+</p>
+{% endblock %}

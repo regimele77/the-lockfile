@@ -1,0 +1,32 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}{{ repository.full_name }}{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Repository detail shell. Scans and findings for this repo will appear here." %}
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <dl class="space-y-3 border border-line bg-surface p-4 text-sm lg:col-span-1">
+    <div>
+      <dt class="text-ink-faint">Short name</dt>
+      <dd class="mt-1">{{ repository.name }}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Visibility</dt>
+      <dd class="mt-1">{% if repository.is_private %}Private{% else %}Public{% endif %}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">GitHub ID</dt>
+      <dd class="mt-1 font-mono text-xs">{% firstof repository.github_id "—" %}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Connected</dt>
+      <dd class="mt-1">{{ repository.created_at|date:"M j, Y H:i" }}</dd>
+    </div>
+  </dl>
+
+  <div class="lg:col-span-2">
+    {% include "partials/empty_state.html" with title="No scans for this repository" description="When the scan pipeline is wired up, you'll trigger scans from here and jump into findings." %}
+  </div>
+</div>
+{% endblock %}

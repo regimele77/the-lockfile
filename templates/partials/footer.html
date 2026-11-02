@@ -1,0 +1,47 @@
+{% load lockfile_tags %}
+<footer class="site-footer mt-auto border-t-2 border-line bg-surface">
+  <div class="site-wrap py-10">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="sm:col-span-2 lg:col-span-1">
+        <a href="{% url 'core:landing' %}" class="flex items-center gap-2 text-ink no-underline hover:no-underline">
+          {% lockfile_mark %}
+          <span class="font-display text-lg text-ink">The Lockfile</span>
+        </a>
+        <p class="mt-3 text-sm text-ink-muted">{{ SITE_TAGLINE }}</p>
+        <p class="mt-2 text-xs text-ink-faint">Self-hosted software security.</p>
+      </div>
+
+      <div>
+        <p class="footer-heading">Product</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="{% url 'core:landing' %}#what-it-finds">What it finds</a></li>
+          <li><a href="{% url 'core:landing' %}#how-it-works">How it works</a></li>
+          <li><a href="{% url 'dashboard:home' %}">Dashboard</a></li>
+          <li><a href="{% url 'accounts:github' %}">Connect with GitHub</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="footer-heading">Legal</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="{% url 'core:privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'core:terms' %}">Terms</a></li>
+          <li><a href="https://thelockfile.com">thelockfile.com</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="footer-heading">Ops</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="{% url 'core:status' %}">Health</a></li>
+          <li><a href="{% url 'core:healthcheck' %}">Health JSON</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 flex flex-col gap-2 border-t border-line pt-4 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+      <p>© {% now "Y" %} The Lockfile</p>
+      <p>Source-available · run it on your own hosts</p>
+    </div>
+  </div>
+</footer>

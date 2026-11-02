@@ -1,0 +1,51 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Dashboard" subtitle="Overview of repositories, scans, and findings on this instance." action_url="/repositories/connect/" action_label="Connect a repo" %}
+
+<div
+  id="dashboard-stats"
+  hx-get="{% url 'dashboard:stats_partial' %}"
+  hx-trigger="every 30s"
+  hx-swap="innerHTML"
+>
+  {% include "dashboard/partials/stats.html" %}
+</div>
+
+<section class="mt-10">
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h2 class="font-display text-lg text-ink">Recent scans</h2>
+    <a href="{% url 'scans:list' %}" class="text-sm">View all</a>
+  </div>
+
+  {% if recent_scans %}
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Scan</th>
+            <th scope="col">Repository</th>
+            <th scope="col">Status</th>
+            <th scope="col">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% load lockfile_tags %}
+          {% for scan in recent_scans %}
+            <tr>
+              <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
+              <td>{{ scan.repository.full_name }}</td>
+              <td>{% status_badge scan.status %}</td>
+              <td class="text-ink-muted">{{ scan.created_at|date:"M j, Y H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {% include "partials/empty_state.html" with title="No scans yet" description="Once you connect a GitHub App and pick repositories, scan results will show up here." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
+  {% endif %}
+</section>
+{% endblock %}

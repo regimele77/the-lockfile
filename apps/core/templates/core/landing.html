@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}The Lockfile{% endblock %}
+{% block body_class %}landing{% endblock %}
+
+{% block content %}
+<section class="hero border-b border-line bg-paper" aria-label="Introduction">
+  <div class="site-wrap py-12 sm:py-16 lg:py-20">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="hero-brand">The Lockfile</p>
+        <hr class="hero-rule">
+        <h1 class="hero-headline">
+          Know what's inside your code.
+        </h1>
+        <p class="hero-lede">
+          Self-hosted scans for secrets, vulnerable dependencies, insecure configs,
+          and weak spots in how you ship.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a href="{% url 'accounts:github' %}" class="btn-primary">Connect with GitHub</a>
+          <a href="#what-it-finds" class="btn-secondary">Learn more</a>
+        </div>
+      </div>
+
+      <aside class="hero-aside" aria-label="Example findings">
+        <p class="hero-aside-label">Example findings</p>
+        <ul class="hero-aside-list">
+          <li><span class="badge-critical">critical</span> Hardcoded secret in <code class="font-mono text-xs">.env.local</code></li>
+          <li><span class="badge-high">high</span> Known CVE in dependency lockfile</li>
+          <li><span class="badge-medium">medium</span> Missing branch protection rules</li>
+          <li><span class="badge-low">low</span> Outdated base image tag</li>
+        </ul>
+        <p class="mt-4 text-xs text-ink-faint">Illustrative only — scanners ship in a later release.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="what-it-finds" class="border-b border-line bg-surface py-14 sm:py-16">
+  <div class="site-wrap">
+    <h2 class="font-display text-2xl text-ink sm:text-3xl">What it finds</h2>
+    <p class="mt-3 text-ink-muted">
+      Clear findings with explanations and recommendations — so your team can fix
+      issues without becoming a security team overnight.
+    </p>
+    <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Exposed secrets</h3>
+        <p class="mt-1 text-sm text-ink-muted">API keys, tokens, and credentials that slipped into the tree or history.</p>
+      </li>
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Vulnerable dependencies</h3>
+        <p class="mt-1 text-sm text-ink-muted">Known CVEs and outdated packages across lockfiles and manifests.</p>
+      </li>
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Insecure configs</h3>
+        <p class="mt-1 text-sm text-ink-muted">Risky defaults in CI, Docker, cloud, and app configuration.</p>
+      </li>
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Missing practices</h3>
+        <p class="mt-1 text-sm text-ink-muted">Branch protection, review rules, and other hygiene that quietly erodes.</p>
+      </li>
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Workflow weak spots</h3>
+        <p class="mt-1 text-sm text-ink-muted">Gaps in how code moves from pull request to production.</p>
+      </li>
+      <li class="section-item">
+        <h3 class="font-display text-lg text-ink">Actionable reports</h3>
+        <p class="mt-1 text-sm text-ink-muted">Every finding explains why it matters and what to do next.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="why-self-hosted" class="border-b border-line bg-paper py-14 sm:py-16">
+  <div class="site-wrap">
+    <h2 class="font-display text-2xl text-ink sm:text-3xl">Why self-hosted</h2>
+    <p class="mt-4 text-ink-muted leading-relaxed">
+      Repo data, scan results, and reports stay on your infrastructure. You connect
+      a GitHub App, pick which repositories to scan, and keep control of the pipeline
+      end to end.
+    </p>
+    <p class="mt-4 text-ink-muted leading-relaxed">
+      Public and private repos are supported. Private access uses GitHub's normal
+      permission model — nothing exotic, nothing opaque.
+    </p>
+    <pre class="mt-8 overflow-x-auto border border-line bg-surface p-4 font-mono text-xs leading-relaxed text-ink-muted"># your stack
+docker compose up --build
+
+# your data
+postgres · redis · local volumes
+
+# your repos
+GitHub App → select → scan</pre>
+  </div>
+</section>
+
+<section id="how-it-works" class="border-b border-line bg-surface py-14 sm:py-16">
+  <div class="site-wrap">
+    <h2 class="font-display text-2xl text-ink sm:text-3xl">How it works</h2>
+    <p class="mt-3 text-ink-muted">Three steps from empty server to first findings.</p>
+    <ol class="mt-10 grid gap-4 sm:grid-cols-3">
+      <li class="section-item">
+        <p class="text-xs text-ink-faint">Step 1</p>
+        <h3 class="mt-1 font-display text-lg text-ink">Install &amp; run</h3>
+        <p class="mt-1 text-sm text-ink-muted">Bring up The Lockfile with Docker Compose on your own hosts.</p>
+      </li>
+      <li class="section-item">
+        <p class="text-xs text-ink-faint">Step 2</p>
+        <h3 class="mt-1 font-display text-lg text-ink">Connect GitHub</h3>
+        <p class="mt-1 text-sm text-ink-muted">Install the GitHub App and choose the repositories you want scanned.</p>
+      </li>
+      <li class="section-item">
+        <p class="text-xs text-ink-faint">Step 3</p>
+        <h3 class="mt-1 font-display text-lg text-ink">Review findings</h3>
+        <p class="mt-1 text-sm text-ink-muted">Read explanations, apply recommendations, and keep shipping with eyes open.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="bg-paper py-14 sm:py-16">
+  <div class="site-wrap">
+    <h2 class="font-display text-2xl text-ink sm:text-3xl">See what's inside.</h2>
+    <p class="mt-3 text-ink-muted">
+      Open the dashboard to explore the product shell. GitHub App connection and
+      scanners land in later releases.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <a href="{% url 'accounts:github' %}" class="btn-primary">Connect with GitHub</a>
+      <a href="{% url 'dashboard:home' %}" class="btn-secondary">Open dashboard</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

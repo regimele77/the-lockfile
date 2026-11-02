@@ -21,6 +21,10 @@ db.sqlite3
 media/
 staticfiles/
 
+# Frontend / Tailwind
+node_modules/
+npm-debug.log*
+
 # Celery Beat local schedule DB
 celerybeat-schedule
 celerybeat-schedule-*

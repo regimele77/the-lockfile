@@ -1,0 +1,22 @@
+<div class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Severity filter">
+  <a
+    href="{% url 'findings:list' %}"
+    class="btn {% if not active_severity %}btn-primary{% else %}btn-secondary{% endif %} text-xs"
+    role="tab"
+    aria-selected="{% if not active_severity %}true{% else %}false{% endif %}"
+    hx-get="{% url 'findings:list' %}"
+    hx-target="#findings-panel"
+    hx-push-url="true"
+  >All</a>
+  {% for value, label in severity_choices %}
+    <a
+      href="?severity={{ value }}"
+      class="btn {% if active_severity == value %}btn-primary{% else %}btn-secondary{% endif %} text-xs"
+      role="tab"
+      aria-selected="{% if active_severity == value %}true{% else %}false{% endif %}"
+      hx-get="{% url 'findings:list' %}?severity={{ value }}"
+      hx-target="#findings-panel"
+      hx-push-url="true"
+    >{{ label }}</a>
+  {% endfor %}
+</div>

@@ -1,0 +1,19 @@
+<table class="data-table w-full">
+  <thead>
+    <tr>
+      <th scope="col">Repositories</th>
+      <th scope="col">Scans</th>
+      <th scope="col">Findings</th>
+      <th scope="col">Critical</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ repo_count }}</td>
+      <td>{{ scan_count }}</td>
+      <td>{{ finding_count }}</td>
+      <td class="text-critical">{{ open_critical }}</td>
+    </tr>
+  </tbody>
+</table>
+<p class="mt-2 text-xs text-ink-faint">Counts refresh every 30s.</p>

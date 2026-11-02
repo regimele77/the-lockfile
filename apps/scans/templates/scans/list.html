@@ -1,0 +1,37 @@
+{% extends "layouts/app.html" %}
+{% load lockfile_tags %}
+
+{% block title %}Scans{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Scans" subtitle="Queued, running, and completed scan jobs." %}
+
+{% if scans %}
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Repository</th>
+          <th scope="col">Status</th>
+          <th scope="col">Started</th>
+          <th scope="col">Finished</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in scans %}
+          <tr>
+            <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
+            <td>{{ scan.repository.full_name }}</td>
+            <td>{% status_badge scan.status %}</td>
+            <td class="text-ink-muted">{% if scan.started_at %}{{ scan.started_at|date:"M j, H:i" }}{% else %}—{% endif %}</td>
+            <td class="text-ink-muted">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, H:i" }}{% else %}—{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  {% include "partials/empty_state.html" with title="No scans yet" description="Scans will appear here once repositories are connected and the Celery scan pipeline is enabled." action_url="/repositories/connect/" action_label="Connect a repository" %}
+{% endif %}
+{% endblock %}
