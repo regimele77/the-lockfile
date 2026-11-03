@@ -22,11 +22,11 @@
   </div>
   <div>
     <dt class="text-ink-faint">Started</dt>
-    <dd class="mt-1">{% if scan.started_at %}{{ scan.started_at|date:"M j, Y H:i" }}{% else %}—{% endif %}</dd>
+    <dd class="mt-1">{% if scan.started_at %}{{ scan.started_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
   </div>
   <div>
     <dt class="text-ink-faint">Finished</dt>
-    <dd class="mt-1">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, Y H:i" }}{% else %}—{% endif %}</dd>
+    <dd class="mt-1">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
   </div>
 </dl>
 
@@ -42,7 +42,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    {% include "partials/empty_state.html" with title="No findings for this scan" description="When scanners are connected, results will list here with severity and remediation guidance." %}
+    {% include "partials/empty_state.html" with title="No findings for this scan" description="When scanners are connected, results will list here with severity and fix notes." %}
   {% endif %}
 {% endwith %}
 {% endblock %}

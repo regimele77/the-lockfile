@@ -3,7 +3,29 @@
 {% block title %}Connect repository{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Connect a GitHub App" subtitle="Stub screen — real OAuth and installation flow ships in a later milestone." %}
+{% include "partials/page_header.html" with title="Connect a GitHub App" subtitle="Installations grant The Lockfile access to the repos you choose." %}
 
-{% include "partials/empty_state.html" with title="GitHub App connection coming soon" description="You'll install The Lockfile GitHub App, grant repository access, and pick which repos to scan. Until then, you can create Repository rows via the Django admin for UI exploration." action_url="/admin/" action_label="Open admin" %}
+{% if installations %}
+<div class="border border-line bg-surface p-4">
+  <p class="text-sm text-ink">Installations connected</p>
+  <ul class="mt-3 space-y-2 text-sm text-ink-muted">
+    {% for installation in installations %}
+    <li>
+      <span class="text-ink">{{ installation.account_login }}</span>
+      <span class="text-ink-faint">({{ installation.account_type }} · id {{ installation.installation_id }})</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="mt-4 text-sm text-ink-muted">
+    Repo sync from these installations is next. You can still add
+    <code class="font-mono text-xs">Repository</code> rows in admin for UI work.
+  </p>
+  <div class="mt-4 flex flex-wrap gap-3">
+    <a href="{% url 'accounts:github_install' %}" class="btn-secondary text-sm">Add another installation</a>
+    <a href="{% url 'repositories:list' %}" class="btn-primary text-sm">View repositories</a>
+  </div>
+</div>
+{% else %}
+{% include "partials/empty_state.html" with title="GitHub App not installed" description="Install the GitHub App on your user or organization account, then pick the repos The Lockfile may access." action_url=install_url action_label="Install GitHub App" %}
+{% endif %}
 {% endblock %}

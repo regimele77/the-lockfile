@@ -34,7 +34,7 @@
     <header class="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2 sm:px-6">
       <p class="truncate text-sm text-ink-muted">
         {% if user.is_authenticated %}
-          Signed in as <span class="text-ink">{{ user.get_username }}</span>
+          Signed in as <span class="text-ink">{% firstof user.github_account.login user.get_username %}</span>
         {% endif %}
       </p>
       <a href="{% url 'accounts:profile' %}" class="text-sm">Profile</a>

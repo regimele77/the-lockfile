@@ -5,16 +5,31 @@
 {% block content %}
 <section class="site-wrap py-14 sm:py-20">
   <h1 class="font-display text-3xl text-ink">Connect with GitHub</h1>
+  <p class="mt-3 max-w-2xl text-ink-muted leading-relaxed">
+    The Lockfile uses a GitHub App for sign-in. There is no password account.
+    Authorize the app, grant repository access when prompted, then land in your
+    dashboard.
+  </p>
+
+  {% if not github_configured %}
   <div class="mt-8 border border-line bg-surface p-4 text-sm text-ink-muted">
-    <p class="text-ink">Coming soon</p>
+    <p class="text-ink">GitHub App not configured</p>
     <p class="mt-2">
-      GitHub App OAuth and installation are not wired up yet. Until then you can
-      explore the product shell via the Django admin after creating a local
-      superuser for development only.
+      Set <code class="font-mono text-xs">GITHUB_APP_CLIENT_ID</code>,
+      <code class="font-mono text-xs">GITHUB_APP_CLIENT_SECRET</code>, and
+      <code class="font-mono text-xs">GITHUB_OAUTH_CALLBACK_URL</code> in
+      <code class="font-mono text-xs">.env</code>, then restart Compose.
+      See the README for App creation steps.
     </p>
   </div>
+  {% endif %}
+
   <div class="mt-8 flex flex-wrap gap-3">
-    <a href="{% url 'repositories:connect' %}" class="btn-primary">Repository connect stub</a>
+    {% if github_configured %}
+    <a href="{% url 'accounts:github_start' %}" class="btn-primary">Continue with GitHub</a>
+    {% else %}
+    <span class="btn-primary opacity-50 pointer-events-none" aria-disabled="true">Continue with GitHub</span>
+    {% endif %}
     <a href="{% url 'core:landing' %}" class="btn-secondary">Back to home</a>
   </div>
 </section>

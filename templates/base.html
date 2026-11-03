@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ SITE_NAME }}{% endblock %} · {{ SITE_TAGLINE }}</title>
   <meta name="description" content="{% block meta_description %}{{ SITE_TAGLINE }} Self-hosted software security for your GitHub repositories.{% endblock %}">
-  {# System fonts only (Tahoma / Consolas) — no webfont CDN. #}
+  {# System fonts only (Tahoma / Consolas). No webfont CDN. #}
   <link rel="icon" href="{% static 'img/logo-mark.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block extra_head %}{% endblock %}
@@ -20,7 +20,7 @@
     {% include "partials/footer.html" %}
   {% endblock %}
 
-  {# HTMX 2.0.4 — pinned CDN. CSRF sent via hx-headers on body. #}
+  {# HTMX 2.0.4 pinned CDN. CSRF sent via hx-headers on body. #}
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
   {% block extra_js %}{% endblock %}
 </body>

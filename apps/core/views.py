@@ -32,7 +32,7 @@ class HealthPageView(TemplateView):
         try:
             connection.ensure_connection()
             db_ok = connection.is_usable()
-        except Exception as exc:  # noqa: BLE001 — surface status, don't crash the page
+        except Exception as exc:  # noqa: BLE001 - surface status, don't crash the page
             db_error = str(exc)
 
         context.update(

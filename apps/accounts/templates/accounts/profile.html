@@ -3,10 +3,27 @@
 {% block title %}Settings{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Settings" subtitle="Profile and instance preferences. GitHub App and org settings will live here." %}
+{% include "partials/page_header.html" with title="Settings" subtitle="Your account on this Lockfile instance." %}
 
 <div class="border border-line bg-surface p-4">
   <dl class="space-y-3 text-sm">
+    {% if github_account %}
+    <div class="flex items-center gap-3">
+      {% if github_account.avatar_url %}
+      <img
+        src="{{ github_account.avatar_url }}"
+        alt=""
+        width="40"
+        height="40"
+        class="size-10 border border-line bg-paper"
+      >
+      {% endif %}
+      <div>
+        <dt class="text-ink-faint">GitHub</dt>
+        <dd class="mt-1 text-ink">{{ github_account.login }}</dd>
+      </div>
+    </div>
+    {% endif %}
     <div>
       <dt class="text-ink-faint">Username</dt>
       <dd class="mt-1 text-ink">{{ user.get_username }}</dd>
@@ -16,8 +33,19 @@
       <dd class="mt-1 text-ink">{% firstof user.email "Not set" %}</dd>
     </div>
   </dl>
-  <p class="mt-5 border-t border-line pt-3 text-sm text-ink-muted">
-    GitHub App connection, notification preferences, and license status are stubs for a later release.
-  </p>
+
+  <div class="mt-5 border-t border-line pt-3">
+    <p class="text-sm text-ink-faint">GitHub App installations</p>
+    {% if github_installations %}
+    <ul class="mt-2 space-y-1 text-sm text-ink">
+      {% for installation in github_installations %}
+      <li>{{ installation.account_login }} <span class="text-ink-faint">({{ installation.account_type }})</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mt-2 text-sm text-ink-muted">No installations linked yet.</p>
+    <a href="{% url 'accounts:github_install' %}" class="btn-secondary mt-3 inline-flex text-sm">Install GitHub App</a>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

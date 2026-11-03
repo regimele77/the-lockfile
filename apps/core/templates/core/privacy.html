@@ -4,58 +4,56 @@
 {% block page_title %}Privacy{% endblock %}
 {% block page_lede %}
 <p class="mt-2 text-sm text-ink-muted">
-  How The Lockfile handles data on a self-hosted instance. This is a product stub,
-  not formal legal advice.
+  Notes on data for a self-hosted Lockfile instance. This is not legal advice.
+  Edit it for your own deployment.
 </p>
 {% endblock %}
 
 {% block legal_body %}
 <section>
-  <h2 class="font-display text-lg text-ink">Self-hosted by design</h2>
+  <h2 class="font-display text-lg text-ink">Where data lives</h2>
   <p class="mt-2">
-    The Lockfile is meant to run on infrastructure you control. Repository contents,
-    scan results, findings, and account data stay with your deployment unless you
-    choose to send them elsewhere.
+    The Lockfile is built to run on hosts you control. Repo content, scan results,
+    findings, and account data stay in your deployment unless you send them out
+    yourself.
   </p>
 </section>
 
 <section>
   <h2 class="font-display text-lg text-ink">What this instance may store</h2>
   <ul class="mt-2 list-disc space-y-1 pl-5">
-    <li>Account credentials and session data for people who sign in</li>
-    <li>Repository metadata you connect (names, IDs, visibility)</li>
-    <li>Scan jobs and findings produced by scanners</li>
-    <li>Operational logs written by Django, Celery, and your host</li>
+    <li>Session data for people who sign in through GitHub</li>
+    <li>Repo metadata you connect (name, id, visibility)</li>
+    <li>Scan jobs and findings</li>
+    <li>Logs from Django, Celery, and the host</li>
   </ul>
 </section>
 
 <section>
   <h2 class="font-display text-lg text-ink">GitHub access</h2>
   <p class="mt-2">
-    When a GitHub App is connected, access follows GitHub's normal permission model
-    for the installation you approve. The Lockfile does not require sending repo
-    data to thelockfile.com to function.
+    After you install the GitHub App, access follows the permissions you approve
+    on GitHub. The app does not need to ship repo data to thelockfile.com to run.
   </p>
 </section>
 
 <section>
-  <h2 class="font-display text-lg text-ink">Cookies and sessions</h2>
+  <h2 class="font-display text-lg text-ink">Cookies</h2>
   <p class="mt-2">
-    Signed-in use relies on session cookies for authentication. There is no third-party
-    advertising tracker in this application shell.
+    Signed-in pages use session cookies. This shell does not load ad trackers.
   </p>
 </section>
 
 <section>
-  <h2 class="font-display text-lg text-ink">Operators</h2>
+  <h2 class="font-display text-lg text-ink">Who is responsible</h2>
   <p class="mt-2">
-    Whoever runs this instance is responsible for their own retention, access control,
-    backups, and disclosure practices. Update this page for your organization as needed.
+    The person or team running the instance owns retention, access control,
+    backups, and any disclosure rules for their org.
   </p>
 </section>
 
 <p class="border-t border-line pt-4 text-xs text-ink-faint">
-  Last updated: placeholder · Contact via
+  Draft page. Contact:
   <a href="https://thelockfile.com">thelockfile.com</a>
 </p>
 {% endblock %}

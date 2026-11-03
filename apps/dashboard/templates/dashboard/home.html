@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Dashboard" subtitle="Overview of repositories, scans, and findings on this instance." action_url="/repositories/connect/" action_label="Connect a repo" %}
+{% include "partials/page_header.html" with title="Dashboard" subtitle="Repositories, scans, and findings on this instance." action_url="/repositories/connect/" action_label="Connect a repo" %}
 
 <div
   id="dashboard-stats"
@@ -45,7 +45,7 @@
       </table>
     </div>
   {% else %}
-    {% include "partials/empty_state.html" with title="No scans yet" description="Once you connect a GitHub App and pick repositories, scan results will show up here." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
+    {% include "partials/empty_state.html" with title="No scans yet" description="Connect a GitHub App and pick repos. Scan results will show up here." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
   {% endif %}
 </section>
 {% endblock %}

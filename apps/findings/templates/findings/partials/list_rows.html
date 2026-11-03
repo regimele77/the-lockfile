@@ -19,7 +19,7 @@
             <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
             <td class="text-ink-muted">{{ finding.get_category_display }}</td>
             <td class="text-ink-muted">{{ finding.scan.repository.full_name }}</td>
-            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "—" %}</td>
+            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "n/a" %}</td>
           </tr>
         {% empty %}
         {% endfor %}
@@ -27,5 +27,5 @@
     </table>
   </div>
 {% else %}
-  {% include "partials/empty_state.html" with title="No findings yet" description="Findings appear after a scan completes. Connect repositories and run a scan to populate this list." action_url="/repositories/connect/" action_label="Connect a repository" %}
+  {% include "partials/empty_state.html" with title="No findings yet" description="Findings show up after a scan finishes. Connect repos and run a scan first." action_url="/repositories/connect/" action_label="Connect a repository" %}
 {% endif %}

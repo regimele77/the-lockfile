@@ -1,7 +1,11 @@
 from django.urls import path
 
 from apps.accounts.views import (
-    GithubConnectStubView,
+    GithubConnectView,
+    GithubInstallStartView,
+    GithubOAuthCallbackView,
+    GithubOAuthStartView,
+    GithubSetupCallbackView,
     LockfileLogoutView,
     ProfileView,
 )
@@ -9,7 +13,11 @@ from apps.accounts.views import (
 app_name = "accounts"
 
 urlpatterns = [
-    path("github/", GithubConnectStubView.as_view(), name="github"),
+    path("github/", GithubConnectView.as_view(), name="github"),
+    path("github/start/", GithubOAuthStartView.as_view(), name="github_start"),
+    path("github/callback/", GithubOAuthCallbackView.as_view(), name="github_callback"),
+    path("github/setup/", GithubSetupCallbackView.as_view(), name="github_setup"),
+    path("github/install/", GithubInstallStartView.as_view(), name="github_install"),
     path("logout/", LockfileLogoutView.as_view(), name="logout"),
     path("profile/", ProfileView.as_view(), name="profile"),
 ]

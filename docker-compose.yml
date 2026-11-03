@@ -27,7 +27,7 @@ services:
       timeout: 3s
       retries: 10
 
-  # Tailwind CSS watch — rebuilds static/css/app.css on template/CSS changes.
+  # Tailwind CSS watch, it rebuilds static/css/app.css on template/CSS changes.
   # One-shot production build: docker compose run --rm frontend npm run build
   frontend:
     image: node:22-alpine

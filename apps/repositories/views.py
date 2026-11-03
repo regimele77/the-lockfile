@@ -1,6 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
+from apps.accounts.models import GitHubInstallation
 from apps.repositories.models import Repository
 
 
@@ -17,5 +19,13 @@ class RepositoryDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "repository"
 
 
-class RepositoryConnectStubView(LoginRequiredMixin, TemplateView):
+class RepositoryConnectView(LoginRequiredMixin, TemplateView):
     template_name = "repositories/connect.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["installations"] = GitHubInstallation.objects.filter(
+            user=self.request.user
+        )
+        context["install_url"] = reverse("accounts:github_install")
+        return context

@@ -4,7 +4,7 @@
 @source "../../apps/**/templates/**/*.html";
 
 /* ------------------------------------------------------------------
-   The Lockfile — plain, slightly older institutional look.
+   The Lockfile: plain, slightly older institutional look.
    Tahoma throughout (simple system UI face). Consolas for code.
 ------------------------------------------------------------------ */
 @theme {

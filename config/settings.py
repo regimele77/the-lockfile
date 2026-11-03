@@ -100,6 +100,22 @@ LOGIN_URL = "accounts:github"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "core:landing"
 
+# GitHub App (user-to-server OAuth + installation groundwork)
+# Create an App at https://github.com/settings/apps/new — see README.
+GITHUB_APP_ID = env("GITHUB_APP_ID", default="")
+GITHUB_APP_CLIENT_ID = env("GITHUB_APP_CLIENT_ID", default="")
+GITHUB_APP_CLIENT_SECRET = env("GITHUB_APP_CLIENT_SECRET", default="")
+# PEM contents (use literal \n for newlines) or leave blank and set path below.
+GITHUB_APP_PRIVATE_KEY = env("GITHUB_APP_PRIVATE_KEY", default="").replace("\\n", "\n")
+GITHUB_APP_PRIVATE_KEY_PATH = env("GITHUB_APP_PRIVATE_KEY_PATH", default="")
+GITHUB_APP_WEBHOOK_SECRET = env("GITHUB_APP_WEBHOOK_SECRET", default="")
+# App slug from the public page URL: https://github.com/apps/<slug>
+GITHUB_APP_NAME = env("GITHUB_APP_NAME", default="")
+GITHUB_OAUTH_CALLBACK_URL = env(
+    "GITHUB_OAUTH_CALLBACK_URL",
+    default="http://localhost:8000/accounts/github/callback/",
+)
+
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=REDIS_URL)
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379/1")

@@ -3,7 +3,7 @@
 {% block title %}Repositories{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Repositories" subtitle="Repositories connected for scanning on this instance." action_url="/repositories/connect/" action_label="Connect repository" %}
+{% include "partials/page_header.html" with title="Repositories" subtitle="Repositories linked for scanning on this instance." action_url="/repositories/connect/" action_label="Connect repository" %}
 
 {% if repositories %}
   <div class="overflow-x-auto">
@@ -27,6 +27,6 @@
     </table>
   </div>
 {% else %}
-  {% include "partials/empty_state.html" with title="No repositories connected" description="Install the GitHub App and choose which repositories The Lockfile should scan. Nothing leaves your infrastructure." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
+  {% include "partials/empty_state.html" with title="No repositories connected" description="Install the GitHub App and choose which repos to scan. Data stays on this host." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
 {% endif %}
 {% endblock %}

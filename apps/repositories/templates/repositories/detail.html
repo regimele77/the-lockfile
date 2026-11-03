@@ -3,7 +3,7 @@
 {% block title %}{{ repository.full_name }}{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title=repository.full_name subtitle="Repository detail shell. Scans and findings for this repo will appear here." %}
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Repo detail. Scans and findings for this repo will show here." %}
 
 <div class="grid gap-6 lg:grid-cols-3">
   <dl class="space-y-3 border border-line bg-surface p-4 text-sm lg:col-span-1">
@@ -17,7 +17,7 @@
     </div>
     <div>
       <dt class="text-ink-faint">GitHub ID</dt>
-      <dd class="mt-1 font-mono text-xs">{% firstof repository.github_id "—" %}</dd>
+      <dd class="mt-1 font-mono text-xs">{% firstof repository.github_id "n/a" %}</dd>
     </div>
     <div>
       <dt class="text-ink-faint">Connected</dt>
@@ -26,7 +26,7 @@
   </dl>
 
   <div class="lg:col-span-2">
-    {% include "partials/empty_state.html" with title="No scans for this repository" description="When the scan pipeline is wired up, you'll trigger scans from here and jump into findings." %}
+    {% include "partials/empty_state.html" with title="No scans for this repository" description="When scanning is wired up, you will start scans from here and open findings from the results." %}
   </div>
 </div>
 {% endblock %}
