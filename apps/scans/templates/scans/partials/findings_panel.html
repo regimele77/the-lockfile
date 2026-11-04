@@ -1,0 +1,39 @@
+{% load lockfile_tags %}
+
+{% if scan_findings %}
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="font-display text-lg">Findings in this scan</h2>
+    <a href="{% url 'findings:list' %}" class="text-sm">All findings</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Severity</th>
+          <th scope="col">Title</th>
+          <th scope="col">Category</th>
+          <th scope="col">File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for finding in scan_findings %}
+          <tr>
+            <td>{% severity_badge finding.severity %}</td>
+            <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
+            <td class="text-ink-muted">{{ finding.get_category_display }}</td>
+            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "n/a" %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  {% if scan.status == "completed" %}
+    {% include "partials/empty_state.html" with title="No findings for this scan" description="Scanners finished and did not report issues. Heuristic checks can miss problems, so treat a clean result as a starting point, not a guarantee." %}
+  {% elif scan.status == "failed" %}
+    {% url 'repositories:detail' scan.repository_id as repo_url %}
+    {% include "partials/empty_state.html" with title="Scan failed" description="Fix the error above, then run another scan from the repository page." action_url=repo_url action_label="Back to repository" %}
+  {% else %}
+    {% include "partials/empty_state.html" with title="Findings appear when the scan finishes" description="Status updates automatically while the worker clones the repo and runs scanners." %}
+  {% endif %}
+{% endif %}

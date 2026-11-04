@@ -136,6 +136,23 @@ SCAN_RESCHEDULE_HOURS = env.int("SCAN_RESCHEDULE_HOURS", default=24)
 # How often Celery beat checks for due repos (hours).
 SCAN_SCHEDULE_CHECK_HOURS = env.int("SCAN_SCHEDULE_CHECK_HOURS", default=1)
 
+# Scanners (run after clone inside the Celery worker)
+SCANNER_ENABLE_SECRETS = env.bool("SCANNER_ENABLE_SECRETS", default=True)
+SCANNER_ENABLE_DEPENDENCIES = env.bool("SCANNER_ENABLE_DEPENDENCIES", default=True)
+SCANNER_ENABLE_CONFIGS = env.bool("SCANNER_ENABLE_CONFIGS", default=True)
+SCANNER_ENABLE_PRACTICES = env.bool("SCANNER_ENABLE_PRACTICES", default=True)
+SCANNER_ENABLE_WORKFLOWS = env.bool("SCANNER_ENABLE_WORKFLOWS", default=True)
+SCANNER_TIMEOUT_SECONDS = env.int("SCANNER_TIMEOUT_SECONDS", default=120)
+SCANNER_MAX_FINDINGS_PER_SCANNER = env.int(
+    "SCANNER_MAX_FINDINGS_PER_SCANNER", default=50
+)
+SCANNER_MAX_FILE_BYTES = env.int("SCANNER_MAX_FILE_BYTES", default=512_000)
+SCANNER_MAX_FILES = env.int("SCANNER_MAX_FILES", default=8_000)
+SCANNER_OSV_ENABLED = env.bool("SCANNER_OSV_ENABLED", default=True)
+SCANNER_OSV_TIMEOUT_SECONDS = env.int("SCANNER_OSV_TIMEOUT_SECONDS", default=30)
+SCANNER_OSV_MAX_PACKAGES = env.int("SCANNER_OSV_MAX_PACKAGES", default=200)
+SCANNER_GITHUB_TIMEOUT_SECONDS = env.int("SCANNER_GITHUB_TIMEOUT_SECONDS", default=20)
+
 CELERY_BEAT_SCHEDULE = {
     "enqueue-due-scans": {
         "task": "apps.scans.tasks.enqueue_due_scans",

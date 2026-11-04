@@ -4,7 +4,7 @@
 {% block title %}{{ repository.full_name }}{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. Run a scan to clone the default branch and prepare findings." %}
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. Run a scan to clone the default branch and produce findings." %}
 
 <div class="grid gap-6 lg:grid-cols-3">
   <dl class="space-y-3 border border-line bg-surface p-4 text-sm lg:col-span-1">
@@ -41,38 +41,73 @@
     </div>
   </dl>
 
-  <div class="lg:col-span-2">
-    <div class="mb-3 flex items-center justify-between gap-3">
-      <h2 class="font-display text-lg text-ink">Recent scans</h2>
-      <a href="{% url 'scans:list' %}" class="text-sm">All scans</a>
+  <div class="lg:col-span-2 space-y-8">
+    <div>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="font-display text-lg text-ink">Recent scans</h2>
+        <a href="{% url 'scans:list' %}" class="text-sm">All scans</a>
+      </div>
+
+      {% if recent_scans %}
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Scan</th>
+              <th scope="col">Status</th>
+              <th scope="col">Trigger</th>
+              <th scope="col">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scan in recent_scans %}
+            <tr>
+              <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
+              <td>{% status_badge scan.status %}</td>
+              <td class="text-ink-muted">{% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}</td>
+              <td class="text-ink-muted">{{ scan.created_at|date:"M j, H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      {% include "partials/empty_state.html" with title="No scans for this repository" description="Click Run scan to clone the default branch and run security scanners." %}
+      {% endif %}
     </div>
 
-    {% if recent_scans %}
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th scope="col">Scan</th>
-            <th scope="col">Status</th>
-            <th scope="col">Trigger</th>
-            <th scope="col">Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for scan in recent_scans %}
-          <tr>
-            <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
-            <td>{% status_badge scan.status %}</td>
-            <td class="text-ink-muted">{% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}</td>
-            <td class="text-ink-muted">{{ scan.created_at|date:"M j, H:i" }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="font-display text-lg text-ink">Recent findings</h2>
+        <a href="{% url 'findings:list' %}" class="text-sm">All findings</a>
+      </div>
+      {% if recent_findings %}
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Severity</th>
+              <th scope="col">Title</th>
+              <th scope="col">Category</th>
+              <th scope="col">Scan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for finding in recent_findings %}
+            <tr>
+              <td>{% severity_badge finding.severity %}</td>
+              <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
+              <td class="text-ink-muted">{{ finding.get_category_display }}</td>
+              <td class="text-ink-muted"><a href="{% url 'scans:detail' finding.scan_id %}">#{{ finding.scan_id }}</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      {% include "partials/empty_state.html" with title="No findings yet" description="Findings from the latest scans appear here. Run a scan to populate this list." %}
+      {% endif %}
     </div>
-    {% else %}
-    {% include "partials/empty_state.html" with title="No scans for this repository" description="Click Run scan to queue the default branch. Findings scanners come in a later milestone." %}
-    {% endif %}
   </div>
 </div>
 {% endblock %}

@@ -9,6 +9,19 @@ from apps.scans.models import Scan
 from apps.scans.services.enqueue import ScanStartError, enqueue_scan_for_repository
 
 
+def _ordered_findings(scan: Scan):
+    severity_order = {
+        "critical": 0,
+        "high": 1,
+        "medium": 2,
+        "low": 3,
+        "info": 4,
+    }
+    findings = list(scan.findings.all())
+    findings.sort(key=lambda f: (severity_order.get(f.severity, 9), f.title.lower()))
+    return findings
+
+
 class ScanListView(LoginRequiredMixin, ListView):
     model = Scan
     template_name = "scans/list.html"
@@ -29,6 +42,11 @@ class ScanDetailView(LoginRequiredMixin, DetailView):
         repos = Repository.objects.selected_for_user(self.request.user)
         return Scan.objects.filter(repository__in=repos).select_related("repository")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["scan_findings"] = _ordered_findings(self.object)
+        return context
+
 
 class ScanStatusPartialView(LoginRequiredMixin, DetailView):
     """HTMX partial: refresh status while a scan is queued or running."""
@@ -40,6 +58,23 @@ class ScanStatusPartialView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         repos = Repository.objects.selected_for_user(self.request.user)
         return Scan.objects.filter(repository__in=repos).select_related("repository")
+
+
+class ScanFindingsPartialView(LoginRequiredMixin, DetailView):
+    """HTMX partial: findings table refreshed when a scan finishes."""
+
+    model = Scan
+    template_name = "scans/partials/findings_panel.html"
+    context_object_name = "scan"
+
+    def get_queryset(self):
+        repos = Repository.objects.selected_for_user(self.request.user)
+        return Scan.objects.filter(repository__in=repos).select_related("repository")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["scan_findings"] = _ordered_findings(self.object)
+        return context
 
 
 class ScanStartView(LoginRequiredMixin, View):

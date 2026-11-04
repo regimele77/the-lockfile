@@ -17,26 +17,7 @@
 
 {% include "scans/partials/status_panel.html" %}
 
-{% with findings=scan.findings.all %}
-  {% if findings %}
-    <h2 class="mb-3 font-display text-lg">Findings in this scan</h2>
-    <ul class="border border-line bg-surface">
-      {% for finding in findings %}
-        <li class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-2 last:border-b-0">
-          <a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a>
-          {% severity_badge finding.severity %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    {% if scan.status == "completed" %}
-      {% include "partials/empty_state.html" with title="No findings for this scan" description="Scanners are not implemented yet. A successful scan currently completes after clone with zero findings." %}
-    {% elif scan.status == "failed" %}
-      {% url 'repositories:detail' scan.repository_id as repo_url %}
-      {% include "partials/empty_state.html" with title="Scan failed" description="Fix the error above, then run another scan from the repository page." action_url=repo_url action_label="Back to repository" %}
-    {% else %}
-      {% include "partials/empty_state.html" with title="Findings appear when the scan finishes" description="Status updates automatically while the worker runs." %}
-    {% endif %}
-  {% endif %}
-{% endwith %}
+<div id="scan-findings">
+  {% include "scans/partials/findings_panel.html" %}
+</div>
 {% endblock %}

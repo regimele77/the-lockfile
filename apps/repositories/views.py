@@ -40,6 +40,7 @@ class RepositoryDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from apps.findings.models import Finding
         from apps.scans.models import Scan
         from apps.scans.services.enqueue import repository_has_active_scan
 
@@ -47,6 +48,11 @@ class RepositoryDetailView(LoginRequiredMixin, DetailView):
         context["recent_scans"] = (
             Scan.objects.filter(repository=repo)
             .order_by("-created_at")[:10]
+        )
+        context["recent_findings"] = (
+            Finding.objects.filter(scan__repository=repo)
+            .select_related("scan")
+            .order_by("-created_at")[:15]
         )
         context["scan_in_progress"] = repository_has_active_scan(repo)
         return context

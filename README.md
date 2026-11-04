@@ -39,7 +39,7 @@ Django apps live under `apps/`:
 | `accounts` | GitHub App OAuth login, installation tokens, webhooks |
 | `dashboard` | Signed-in overview (HTMX-refreshed stats) |
 | `repositories` | Repo sync, connect picker, list/detail; `Repository` model |
-| `scans` | Scan pipeline (queue, Celery clone, status UI); scanners placeholder |
+| `scans` | Scan pipeline (queue, Celery clone, scanners, status UI) |
 | `findings` | Finding list/detail with severity filters (HTMX); `Finding` model |
 
 Templates: project-level `templates/` (base, layouts, partials) plus per-app templates. Product UI extends `layouts/app.html`.
@@ -77,9 +77,7 @@ Templates: project-level `templates/` (base, layouts, partials) plus per-app tem
    6. Confirm them on [/repositories/](http://localhost:8000/repositories/)
    7. Open a repo and click **Run scan** (or use **Scan selected** on the list)
    8. Watch [/scans/](http://localhost:8000/scans/) move queued -> running -> completed or failed
-
-   Real vulnerability / secret / config scanners are still out of scope. A successful
-   scan currently completes after clone with zero findings.
+   9. Open the scan detail page and [/findings/](http://localhost:8000/findings/) for plain-language results
 
 Stop with `Ctrl+C`, or run in the background with `docker compose up --build -d` and stop later with `docker compose down`.
 
@@ -100,11 +98,13 @@ There is no username/password login. Identity and repo access come from a
        URL ending in `/accounts/github/webhook/`.
      - You can leave webhooks inactive locally and use **Refresh from GitHub**
        on `/repositories/connect/` instead.
-3. Permissions (minimum for login, repo listing, and cloning):
+3. Permissions (minimum for login, repo listing, cloning, and practices checks):
    - **Account permissions → Email addresses**: Read-only
    - **Repository permissions → Metadata**: Read-only (required to list repos)
    - **Repository permissions → Contents**: Read-only (required to clone for scans)
-   - Later: Dependabot alerts and other scanner-specific permissions as needed
+   - **Repository permissions → Administration**: Read-only (required to read branch
+     protection for the practices scanner). Without this, practices checks skip
+     cleanly and may emit a low/info finding about missing permissions.
 4. Subscribe to webhook events (when webhooks are active):
    - `installation`
    - `installation_repositories`
@@ -170,8 +170,39 @@ There is no username/password login. Identity and repo access come from a
   default 1h). Tracked repos whose last finished scan is older than
   `SCAN_RESCHEDULE_HOURS` (default 24h), or never scanned, get a scheduled scan.
   Active queued/running scans are skipped.
-- Scanner hook: `apps/scans/services/scanners.py` (`run_scanners`). Placeholder
-  for the next milestone.
+- After clone, the worker calls `run_scanners` in `apps/scans/services/scanners/`.
+  Findings are stored on the Scan and shown on scan detail, repo detail, and
+  `/findings/`.
+
+### Scanners
+
+Hook: `apps/scans/services/scanners/__init__.py` → `run_scanners(scan, workspace)`.
+One scanner failing is logged and skipped; others continue. Re-running scanners
+on the same Scan replaces that scan's findings (no duplicate spam).
+
+| Scanner | What it checks |
+|---------|----------------|
+| Secrets | Common API keys, tokens, private key blocks, and high-entropy secret-like assignments in source/config. Values are redacted in stored findings. |
+| Dependencies | Parses common lockfiles/manifests (`package-lock.json`, `yarn.lock`, `requirements.txt`, `poetry.lock`, `Pipfile.lock`, `go.mod`, `Cargo.lock`, `Gemfile.lock`) and looks up known advisories via the [OSV](https://osv.dev/) API. |
+| Configs | Heuristics for floating Docker/`compose` `:latest` tags, dangerous GitHub Actions permissions / `pull_request_target` misuse, privileged compose, hard-coded Django `DEBUG = True`, and similar. |
+| Practices | GitHub API branch protection on the default branch (required reviews, status checks, force-push, admin enforcement). Needs Administration: Read on the App. |
+| Workflows | Gaps in `.github/workflows` (missing CI, dispatch-only, no test-like jobs, secrets echoed to logs, deploy jobs without Environments). |
+
+Limits and toggles (see `.env.example`): `SCANNER_ENABLE_*`, `SCANNER_TIMEOUT_SECONDS`,
+`SCANNER_MAX_FINDINGS_PER_SCANNER`, `SCANNER_MAX_FILE_BYTES`, `SCANNER_MAX_FILES`,
+`SCANNER_OSV_ENABLED`, `SCANNER_OSV_TIMEOUT_SECONDS`, `SCANNER_OSV_MAX_PACKAGES`,
+`SCANNER_GITHUB_TIMEOUT_SECONDS`.
+
+**Honest limits:** these are high-signal heuristics, not a full SAST/DAST suite.
+Expect some false positives and some misses (especially for uncommon ecosystems,
+encrypted secrets, or private advisory sources). Dependency CVE lookup needs
+outbound HTTPS to `api.osv.dev` and degrades gracefully if the network call fails.
+Git history secret scanning is not implemented yet (working tree only). Always
+read the Explanation and Recommendation on a finding before rotating credentials
+or changing production config.
+
+**How to test:** select a repo → **Run scan** → open the scan detail page and
+`/findings/` for severity, category, summary, and fix steps.
 
 ### Frontend (Tailwind)
 

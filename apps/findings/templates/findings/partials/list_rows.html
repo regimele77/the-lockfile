@@ -27,5 +27,5 @@
     </table>
   </div>
 {% else %}
-  {% include "partials/empty_state.html" with title="No findings yet" description="Findings show up after a scan finishes. Connect repos and run a scan first." action_url="/repositories/connect/" action_label="Connect a repository" %}
+  {% include "partials/empty_state.html" with title="No findings yet" description="Findings appear after a scan finishes. Connect repos, run a scan, then review results here and on each scan detail page." action_url="/repositories/" action_label="View repositories" %}
 {% endif %}

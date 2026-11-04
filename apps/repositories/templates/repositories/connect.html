@@ -70,7 +70,7 @@
             >
           </td>
           <td>
-            <label for="repo-{{ repo.github_id }}" class="text-ink cursor-pointer">{{ repo.full_name }}</label>
+            <label for="repo-{{ repo.github_id }}" class="text-ink">{{ repo.full_name }}</label>
           </td>
           <td class="text-ink-muted">{% if repo.is_private %}Private{% else %}Public{% endif %}</td>
           <td class="text-ink-muted">{{ repo.installation.account_login }}</td>

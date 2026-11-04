@@ -51,11 +51,24 @@
   </div>
   {% elif scan.status == "completed" %}
   <p class="mt-4 text-sm text-ink-muted">
-    Clone finished. Vulnerability scanners are not wired yet, so this scan may have zero findings.
+    Scan finished. Findings from secrets, dependencies, configs, practices, and workflow checks are listed below when any were reported.
   </p>
+  <div
+    hx-get="{% url 'scans:findings_partial' scan.pk %}"
+    hx-trigger="load"
+    hx-target="#scan-findings"
+    hx-swap="innerHTML"
+  ></div>
+  {% elif scan.status == "failed" %}
+  <div
+    hx-get="{% url 'scans:findings_partial' scan.pk %}"
+    hx-trigger="load"
+    hx-target="#scan-findings"
+    hx-swap="innerHTML"
+  ></div>
   {% elif scan.is_active %}
   <p class="mt-4 text-sm text-ink-muted">
-    {% if scan.status == "queued" %}Waiting for the worker...{% else %}Cloning repository and preparing the workspace...{% endif %}
+    {% if scan.status == "queued" %}Waiting for the worker...{% else %}Cloning the repository and running scanners...{% endif %}
   </p>
   {% endif %}
 </div>
