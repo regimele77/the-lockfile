@@ -3,13 +3,13 @@
 {% block title %}Health{% endblock %}
 
 {% block content %}
-<article class="site-wrap py-10 sm:py-14">
-  <header class="mb-8 border-b border-line pb-4">
-    <p class="text-xs text-ink-faint">Operations</p>
-    <h1 class="mt-1 font-display text-3xl text-ink">Health</h1>
-    <p class="mt-2 text-sm text-ink-muted">
+<article class="site-wrap py-12 sm:py-16">
+  <header class="mb-10 border-b border-line pb-5">
+    <p class="page-header-eyebrow">Operations</p>
+    <h1 class="type-title">Health</h1>
+    <p class="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
       Instance status for this deployment. Machine-readable JSON is available at
-      <a href="{% url 'core:healthcheck' %}"><code class="font-mono text-xs">/health/</code></a>.
+      <a href="{% url 'core:healthcheck' %}"><code class="type-mono">/health/</code></a>.
     </p>
   </header>
 
@@ -19,30 +19,32 @@
     {% else %}
       <span class="status-failed">Overall: degraded</span>
     {% endif %}
-    <span class="text-ink-faint">Checked {{ checked_at|date:"Y-m-d H:i:s" }} UTC</span>
+    <span class="type-caption">Checked {{ checked_at|date:"Y-m-d H:i:s" }} UTC</span>
   </div>
 
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th scope="col">Check</th>
-        <th scope="col">Status</th>
-        <th scope="col">Detail</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Web application</td>
-        <td>{% if app_ok %}<span class="status-completed">ok</span>{% else %}<span class="status-failed">fail</span>{% endif %}</td>
-        <td class="text-ink-muted">Django is serving this page</td>
-      </tr>
-      <tr>
-        <td>Database</td>
-        <td>{% if db_ok %}<span class="status-completed">ok</span>{% else %}<span class="status-failed">fail</span>{% endif %}</td>
-        <td class="text-ink-muted">{% if db_ok %}PostgreSQL connection usable{% else %}{{ db_error|default:"Connection failed" }}{% endif %}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrap max-w-3xl">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Check</th>
+          <th scope="col">Status</th>
+          <th scope="col">Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Web application</td>
+          <td>{% if app_ok %}<span class="status-completed">ok</span>{% else %}<span class="status-failed">fail</span>{% endif %}</td>
+          <td class="text-ink-muted">Django is serving this page</td>
+        </tr>
+        <tr>
+          <td>Database</td>
+          <td>{% if db_ok %}<span class="status-completed">ok</span>{% else %}<span class="status-failed">fail</span>{% endif %}</td>
+          <td class="text-ink-muted">{% if db_ok %}PostgreSQL connection usable{% else %}{{ db_error|default:"Connection failed" }}{% endif %}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <p class="mt-6 text-sm text-ink-muted">
     For monitoring, prefer the JSON endpoint:

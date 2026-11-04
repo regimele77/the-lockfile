@@ -3,15 +3,19 @@
 {% block title %}Connect repositories{% endblock %}
 
 {% block content %}
+{% if installations and repositories %}
+{% include "partials/page_header.html" with title="Connect repositories" subtitle="Choose which installed GitHub repos The Lockfile should track on this host." submit_form="connect-save-form" submit_label="Save selection" secondary_url="/repositories/" secondary_label="View tracked repos" %}
+{% else %}
 {% include "partials/page_header.html" with title="Connect repositories" subtitle="Choose which installed GitHub repos The Lockfile should track on this host." %}
+{% endif %}
 
 {% if not installations %}
 {% include "partials/empty_state.html" with title="GitHub App not installed" description="Install the GitHub App on your user or organization account, then pick the repos The Lockfile may access." action_url=install_url action_label="Install GitHub App" %}
 {% else %}
 
-<div class="mb-4 flex flex-wrap items-center gap-3 border border-line bg-surface p-4">
+<div class="panel mb-4 flex flex-wrap items-center gap-4">
   <div class="min-w-0 flex-1">
-    <p class="text-sm text-ink">Installations</p>
+    <p class="notice-title">Installations</p>
     <ul class="mt-2 space-y-1 text-sm text-ink-muted">
       {% for installation in installations %}
       <li>
@@ -22,30 +26,32 @@
     </ul>
   </div>
   <div class="flex flex-wrap gap-2">
-    <a href="{% url 'accounts:github_install' %}" class="btn-secondary text-sm">Add installation</a>
+    <a href="{% url 'accounts:github_install' %}" class="btn-secondary btn-sm">Add installation</a>
     <form method="post" action="{% url 'repositories:connect' %}">
       {% csrf_token %}
       <input type="hidden" name="action" value="refresh">
-      <button type="submit" class="btn-secondary text-sm"{% if not app_credentials_ready %} title="Set GITHUB_APP_ID and private key in .env"{% endif %}>Refresh from GitHub</button>
+      <button type="submit" class="btn-secondary btn-sm"{% if not app_credentials_ready %} title="Set GITHUB_APP_ID and private key in .env"{% endif %}>Refresh from GitHub</button>
     </form>
   </div>
 </div>
 
 {% if not app_credentials_ready %}
-<p class="mb-4 text-sm text-ink-muted">
-  App ID and private key are required to list repositories. Set
-  <code class="font-mono text-xs">GITHUB_APP_ID</code> and
-  <code class="font-mono text-xs">GITHUB_APP_PRIVATE_KEY</code> (or path) in
-  <code class="font-mono text-xs">.env</code>, then refresh.
-</p>
+<div class="notice mb-4">
+  <p>
+    App ID and private key are required to list repositories. Set
+    <code class="type-mono">GITHUB_APP_ID</code> and
+    <code class="type-mono">GITHUB_APP_PRIVATE_KEY</code> (or path) in
+    <code class="type-mono">.env</code>, then refresh.
+  </p>
+</div>
 {% endif %}
 
 {% if repositories %}
-<form method="post" action="{% url 'repositories:connect' %}">
+<form id="connect-save-form" method="post" action="{% url 'repositories:connect' %}">
   {% csrf_token %}
   <input type="hidden" name="action" value="save">
 
-  <div class="overflow-x-auto border border-line">
+  <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
@@ -81,8 +87,8 @@
   </div>
 
   <div class="mt-4 flex flex-wrap items-center gap-3">
-    <button type="submit" class="btn-primary text-sm">Save selection</button>
-    <a href="{% url 'repositories:list' %}" class="btn-secondary text-sm">View tracked repos</a>
+    <button type="submit" class="btn-primary">Save selection</button>
+    <a href="{% url 'repositories:list' %}" class="btn-secondary">View tracked repos</a>
     {% if selected_count %}
     <p class="text-sm text-ink-muted">Currently tracking {{ selected_count }}.</p>
     {% else %}
@@ -95,7 +101,7 @@
 <form method="post" action="{% url 'repositories:connect' %}" class="mt-4">
   {% csrf_token %}
   <input type="hidden" name="action" value="refresh">
-  <button type="submit" class="btn-primary text-sm">Refresh from GitHub</button>
+  <button type="submit" class="btn-primary">Refresh from GitHub</button>
 </form>
 {% endif %}
 

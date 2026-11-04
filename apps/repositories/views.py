@@ -27,6 +27,13 @@ class RepositoryListView(LoginRequiredMixin, ListView):
             .order_by("full_name")
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.findings.services.guidance import onboarding_guidance
+
+        context["empty_guidance"] = onboarding_guidance(self.request.user)
+        return context
+
 
 class RepositoryDetailView(LoginRequiredMixin, DetailView):
     model = Repository
@@ -47,10 +54,13 @@ class RepositoryDetailView(LoginRequiredMixin, DetailView):
         repo = self.object
         context["recent_scans"] = (
             Scan.objects.filter(repository=repo)
-            .order_by("-created_at")[:10]
+            .order_by("-created_at", "-pk")[:10]
         )
         context["recent_findings"] = (
-            Finding.objects.filter(scan__repository=repo)
+            Finding.objects.filter(
+                scan__repository=repo,
+                status=Finding.Status.OPEN,
+            )
             .select_related("scan")
             .order_by("-created_at")[:15]
         )

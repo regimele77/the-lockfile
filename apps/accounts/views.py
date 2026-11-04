@@ -9,7 +9,6 @@ from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
 
 from apps.accounts.models import GitHubInstallation
 from apps.accounts.services.auth import (
@@ -202,19 +201,6 @@ class GithubSetupCallbackView(View):
 
 class LockfileLogoutView(LogoutView):
     next_page = reverse_lazy("core:landing")
-
-
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/profile.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        account = getattr(self.request.user, "github_account", None)
-        context["github_account"] = account
-        context["github_installations"] = GitHubInstallation.objects.filter(
-            user=self.request.user
-        )
-        return context
 
 
 class GithubInstallStartView(LoginRequiredMixin, View):

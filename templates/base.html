@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ SITE_NAME }}{% endblock %} · {{ SITE_TAGLINE }}</title>
   <meta name="description" content="{% block meta_description %}{{ SITE_TAGLINE }} Self-hosted software security for your GitHub repositories.{% endblock %}">
-  {# System fonts only (Tahoma / Consolas). No webfont CDN. #}
+  {# System fonts only (system-ui / Consolas). No webfont CDN. #}
   <link rel="icon" href="{% static 'img/logo-mark.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <a class="skip-link" href="#main">Skip to content</a>
   {% block body %}
     {% include "partials/nav_marketing.html" %}
     {% include "partials/flash_messages.html" %}

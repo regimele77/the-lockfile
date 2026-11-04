@@ -2,14 +2,15 @@
 
 {% if scan_findings %}
   <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-    <h2 class="font-display text-lg">Findings in this scan</h2>
-    <a href="{% url 'findings:list' %}" class="text-sm">All findings</a>
+    <h2 class="section-heading">Findings in this scan</h2>
+    <a href="{% url 'findings:list' %}?scan={{ scan.pk }}&status=all" class="text-sm">Filter on findings</a>
   </div>
-  <div class="overflow-x-auto">
+  <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
           <th scope="col">Severity</th>
+          <th scope="col">Status</th>
           <th scope="col">Title</th>
           <th scope="col">Category</th>
           <th scope="col">File</th>
@@ -19,9 +20,20 @@
         {% for finding in scan_findings %}
           <tr>
             <td>{% severity_badge finding.severity %}</td>
+            <td>{% status_badge finding.status %}</td>
             <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
             <td class="text-ink-muted">{{ finding.get_category_display }}</td>
-            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "n/a" %}</td>
+            <td class="cell-mono">
+              {% if finding.display_path %}
+                {% if finding.github_blob_url %}
+                  <a href="{{ finding.github_blob_url }}" target="_blank" rel="noopener noreferrer">{{ finding.display_path }}</a>
+                {% else %}
+                  {{ finding.display_path }}
+                {% endif %}
+              {% else %}
+                n/a
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>

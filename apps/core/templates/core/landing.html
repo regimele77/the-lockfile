@@ -5,17 +5,18 @@
 
 {% block content %}
 <section class="hero border-b border-line bg-paper" aria-label="Introduction">
-  <div class="site-wrap py-12 sm:py-16 lg:py-20">
+  <div class="site-wrap py-16 sm:py-20 lg:py-24">
     <div class="hero-grid">
       <div class="hero-copy">
         <p class="hero-brand">The Lockfile</p>
-        <hr class="hero-rule">
+        <hr class="hero-rule" aria-hidden="true">
         <h1 class="hero-headline">
           Know what's inside your code.
         </h1>
         <p class="hero-lede">
-          Run it on your own servers. It checks GitHub repos for secrets, bad
-          dependency versions, weak config, and gaps in how you ship code.
+          Self-hosted security for GitHub repos. Connect an App, pick repositories,
+          and triage findings for secrets, vulnerable dependencies, weak config,
+          and shipping gaps.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
           <a href="{% url 'accounts:github' %}" class="btn-primary">Connect with GitHub</a>
@@ -26,65 +27,77 @@
       <aside class="hero-aside" aria-label="Example findings">
         <p class="hero-aside-label">Example findings</p>
         <ul class="hero-aside-list">
-          <li><span class="badge-critical">critical</span> Hardcoded secret in <code class="font-mono text-xs">.env.local</code></li>
-          <li><span class="badge-high">high</span> Known CVE in a lockfile dependency</li>
-          <li><span class="badge-medium">medium</span> Branch protection not enabled</li>
-          <li><span class="badge-low">low</span> Base image tag is floating</li>
+          <li>
+            <span class="badge-critical">Critical</span>
+            <span>Hardcoded secret in <code class="type-mono">.env.local</code></span>
+          </li>
+          <li>
+            <span class="badge-high">High</span>
+            <span>Known CVE in a lockfile dependency</span>
+          </li>
+          <li>
+            <span class="badge-medium">Medium</span>
+            <span>Branch protection not enabled</span>
+          </li>
+          <li>
+            <span class="badge-low">Low</span>
+            <span>Base image tag is floating</span>
+          </li>
         </ul>
       </aside>
     </div>
   </div>
 </section>
 
-<section id="what-it-finds" class="border-b border-line bg-surface py-14 sm:py-16">
+<section id="what-it-finds" class="border-b border-line bg-surface py-16 sm:py-20">
   <div class="site-wrap">
-    <h2 class="font-display text-2xl text-ink sm:text-3xl">What it finds</h2>
-    <p class="mt-3 text-ink-muted">
+    <h2 class="type-title">What it finds</h2>
+    <p class="section-lede">
       Each finding includes a short explanation and a concrete fix. You do not
       need a security background to act on most of them.
     </p>
-    <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Exposed secrets</h3>
-        <p class="mt-1 text-sm text-ink-muted">Keys and tokens that ended up in the repo or git history.</p>
+        <h3 class="type-heading">Exposed secrets</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Keys and tokens that ended up in the repo or git history.</p>
       </li>
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Vulnerable dependencies</h3>
-        <p class="mt-1 text-sm text-ink-muted">Known CVEs and old packages in manifests and lockfiles.</p>
+        <h3 class="type-heading">Vulnerable dependencies</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Known CVEs and old packages in manifests and lockfiles.</p>
       </li>
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Insecure configs</h3>
-        <p class="mt-1 text-sm text-ink-muted">Risky defaults in CI, Docker, cloud, and app config files.</p>
+        <h3 class="type-heading">Insecure configs</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Risky defaults in CI, Docker, cloud, and app config files.</p>
       </li>
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Missing practices</h3>
-        <p class="mt-1 text-sm text-ink-muted">Things like branch protection and required reviews that are not set.</p>
+        <h3 class="type-heading">Missing practices</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Things like branch protection and required reviews that are not set.</p>
       </li>
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Workflow gaps</h3>
-        <p class="mt-1 text-sm text-ink-muted">Places where code can reach production without enough checks.</p>
+        <h3 class="type-heading">Workflow gaps</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Places where code can reach production without enough checks.</p>
       </li>
       <li class="section-item">
-        <h3 class="font-display text-lg text-ink">Plain-language reports</h3>
-        <p class="mt-1 text-sm text-ink-muted">What was found, why it matters, and what to change.</p>
+        <h3 class="type-heading">Plain-language reports</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">What was found, why it matters, and what to change.</p>
       </li>
     </ul>
   </div>
 </section>
 
-<section id="why-self-hosted" class="border-b border-line bg-paper py-14 sm:py-16">
+<section id="why-self-hosted" class="border-b border-line bg-paper py-16 sm:py-20">
   <div class="site-wrap">
-    <h2 class="font-display text-2xl text-ink sm:text-3xl">Why self-hosted</h2>
-    <p class="mt-4 text-ink-muted leading-relaxed">
+    <h2 class="type-title">Why self-hosted</h2>
+    <p class="section-lede">
       Code, scan results, and reports stay on machines you run. Install a GitHub
       App, choose repos, and scan. Nothing is required to leave your network for
       the product to work.
     </p>
-    <p class="mt-4 text-ink-muted leading-relaxed">
+    <p class="mt-4 max-w-2xl text-sm leading-relaxed text-ink-muted">
       Public and private repos both work. Private access uses GitHub permissions
       the same way other GitHub Apps do.
     </p>
-    <pre class="mt-8 overflow-x-auto border border-line bg-surface p-4 font-mono text-xs leading-relaxed text-ink-muted"># stack
+    <pre class="code-block mt-8"># stack
 docker compose up --build
 
 # data
@@ -95,37 +108,37 @@ GitHub App -> select -> scan</pre>
   </div>
 </section>
 
-<section id="how-it-works" class="border-b border-line bg-surface py-14 sm:py-16">
+<section id="how-it-works" class="border-b border-line bg-surface py-16 sm:py-20">
   <div class="site-wrap">
-    <h2 class="font-display text-2xl text-ink sm:text-3xl">How it works</h2>
-    <p class="mt-3 text-ink-muted">Three steps to get from a blank host to your first findings.</p>
+    <h2 class="type-title">How it works</h2>
+    <p class="section-lede">Three steps to get from a blank host to your first findings.</p>
     <ol class="mt-10 grid gap-4 sm:grid-cols-3">
       <li class="section-item">
-        <p class="text-xs text-ink-faint">Step 1</p>
-        <h3 class="mt-1 font-display text-lg text-ink">Install and run</h3>
-        <p class="mt-1 text-sm text-ink-muted">Start The Lockfile with Docker Compose on your hosts.</p>
+        <p class="type-caption">Step 1</p>
+        <h3 class="mt-1.5 type-heading">Install and run</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Start The Lockfile with Docker Compose on your hosts.</p>
       </li>
       <li class="section-item">
-        <p class="text-xs text-ink-faint">Step 2</p>
-        <h3 class="mt-1 font-display text-lg text-ink">Connect GitHub</h3>
-        <p class="mt-1 text-sm text-ink-muted">Install the GitHub App and pick the repos to scan.</p>
+        <p class="type-caption">Step 2</p>
+        <h3 class="mt-1.5 type-heading">Connect GitHub</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Install the GitHub App and pick the repos to scan.</p>
       </li>
       <li class="section-item">
-        <p class="text-xs text-ink-faint">Step 3</p>
-        <h3 class="mt-1 font-display text-lg text-ink">Review findings</h3>
-        <p class="mt-1 text-sm text-ink-muted">Read the report, make the changes, and move on.</p>
+        <p class="type-caption">Step 3</p>
+        <h3 class="mt-1.5 type-heading">Review findings</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Read the report, make the changes, and move on.</p>
       </li>
     </ol>
   </div>
 </section>
 
-<section class="bg-paper py-14 sm:py-16">
+<section class="bg-paper py-16 sm:py-20">
   <div class="site-wrap">
-    <h2 class="font-display text-2xl text-ink sm:text-3xl">Try the UI</h2>
-    <p class="mt-3 text-ink-muted">
-      Connect with GitHub to open the dashboard. Scanners are still in progress.
+    <h2 class="type-title">Get started</h2>
+    <p class="section-lede">
+      Connect with GitHub to open the dashboard. Scanners continue to improve over time.
     </p>
-    <div class="mt-6 flex flex-wrap items-center gap-3">
+    <div class="mt-8 flex flex-wrap items-center gap-3">
       <a href="{% url 'accounts:github' %}" class="btn-primary">Connect with GitHub</a>
       <a href="{% url 'dashboard:home' %}" class="btn-secondary">Open dashboard</a>
     </div>

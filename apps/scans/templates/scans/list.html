@@ -7,11 +7,11 @@
 {% include "partials/page_header.html" with title="Scans" subtitle="Queued, running, completed, and failed jobs for your tracked repositories." action_url="/repositories/" action_label="Repositories" %}
 
 {% if scans %}
-  <div class="overflow-x-auto">
+  <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
-          <th scope="col">ID</th>
+          <th scope="col" class="w-12">#</th>
           <th scope="col">Repository</th>
           <th scope="col">Status</th>
           <th scope="col">Trigger</th>
@@ -22,8 +22,12 @@
       <tbody>
         {% for scan in scans %}
           <tr>
-            <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
-            <td>{{ scan.repository.full_name }}</td>
+            <td class="text-ink-muted">
+              <a href="{% url 'scans:detail' scan.pk %}" class="text-ink-muted no-underline hover:text-ink hover:underline">
+                {% if page_obj %}{{ page_obj.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}
+              </a>
+            </td>
+            <td><a href="{% url 'scans:detail' scan.pk %}">{{ scan.repository.full_name }}</a></td>
             <td>{% status_badge scan.status %}</td>
             <td class="text-ink-muted">{% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}</td>
             <td class="text-ink-muted">{% if scan.started_at %}{{ scan.started_at|date:"M j, H:i" }}{% else %}n/a{% endif %}</td>
@@ -34,6 +38,6 @@
     </table>
   </div>
 {% else %}
-  {% include "partials/empty_state.html" with title="No scans yet" description="Open a tracked repository and click Run scan. The Celery worker must be running (docker compose includes it)." action_url="/repositories/" action_label="View repositories" %}
+  {% include "partials/empty_state.html" with title=empty_guidance.title description=empty_guidance.description action_url=empty_guidance.action_url action_label=empty_guidance.action_label %}
 {% endif %}
 {% endblock %}

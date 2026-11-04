@@ -1,31 +1,71 @@
 {% load lockfile_tags %}
 
 {% if findings %}
-  <div class="overflow-x-auto">
+  <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
           <th scope="col">Severity</th>
+          <th scope="col">Status</th>
           <th scope="col">Title</th>
           <th scope="col">Category</th>
           <th scope="col">Repository</th>
           <th scope="col">File</th>
+          <th scope="col" class="cell-actions"><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
       <tbody>
         {% for finding in findings %}
           <tr>
             <td>{% severity_badge finding.severity %}</td>
+            <td>{% status_badge finding.status %}</td>
             <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
             <td class="text-ink-muted">{{ finding.get_category_display }}</td>
             <td class="text-ink-muted">{{ finding.scan.repository.full_name }}</td>
-            <td class="font-mono text-xs text-ink-faint">{% firstof finding.file_path "n/a" %}</td>
+            <td class="cell-mono">
+              {% if finding.display_path %}
+                {% if finding.github_blob_url %}
+                  <a href="{{ finding.github_blob_url }}" target="_blank" rel="noopener noreferrer">{{ finding.display_path }}</a>
+                {% else %}
+                  {{ finding.display_path }}
+                {% endif %}
+              {% else %}
+                n/a
+              {% endif %}
+            </td>
+            <td class="cell-actions">
+              <div class="inline-flex flex-wrap justify-end gap-1">
+                {% if finding.status == "open" %}
+                  <form method="post" action="{% url 'findings:status' finding.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="resolve">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn-secondary btn-sm">Resolve</button>
+                  </form>
+                  <form method="post" action="{% url 'findings:status' finding.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ignore">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn-ghost btn-sm">Ignore</button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'findings:status' finding.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reopen">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn-secondary btn-sm">Reopen</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
           </tr>
         {% empty %}
         {% endfor %}
       </tbody>
     </table>
   </div>
+{% elif filters_active %}
+  {% include "partials/empty_state.html" with title="No findings match these filters" description="Try clearing a status, severity, category, repository, or scan filter." action_url="/findings/" action_label="Clear filters" %}
 {% else %}
-  {% include "partials/empty_state.html" with title="No findings yet" description="Findings appear after a scan finishes. Connect repos, run a scan, then review results here and on each scan detail page." action_url="/repositories/" action_label="View repositories" %}
+  {% include "partials/empty_state.html" with title=empty_guidance.title description=empty_guidance.description action_url=empty_guidance.action_url action_label=empty_guidance.action_label %}
 {% endif %}

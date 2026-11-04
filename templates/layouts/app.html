@@ -4,45 +4,59 @@
 {% block body_class %}app-shell{% endblock %}
 
 {% block body %}
-<div class="min-h-screen lg:grid lg:grid-cols-[200px_1fr]">
-  <aside class="border-b border-line bg-surface lg:border-b-0 lg:border-r">
-    <div class="flex items-center justify-between gap-3 px-3 py-3 lg:px-4">
-      <a href="{% url 'dashboard:home' %}" class="flex items-center gap-2 text-ink no-underline hover:no-underline">
+<div class="app-frame">
+  <aside class="app-sidebar" aria-label="Application">
+    <div class="flex shrink-0 items-center justify-between gap-3 px-3 py-3.5 lg:px-4">
+      <a href="{% url 'dashboard:home' %}" class="brand-lockup">
         {% lockfile_mark %}
-        <span class="font-display text-lg text-ink">The Lockfile</span>
+        <span class="brand-name">The Lockfile</span>
       </a>
-      <button type="button" class="btn-ghost px-2 py-1 lg:hidden" aria-controls="app-nav" aria-expanded="false" data-nav-toggle>
+      <button type="button" class="btn-ghost btn-sm lg:hidden" aria-controls="app-nav" aria-expanded="false" data-nav-toggle>
         Menu
       </button>
     </div>
-    <nav id="app-nav" class="hidden flex-col gap-0.5 px-2 pb-4 lg:flex" aria-label="Product">
-      <a class="app-nav-link {% nav_active request 'dashboard:home' 'dashboard:stats_partial' %}" href="{% url 'dashboard:home' %}">Dashboard</a>
-      <a class="app-nav-link {% nav_active request 'repositories:list' 'repositories:detail' 'repositories:connect' %}" href="{% url 'repositories:list' %}">Repositories</a>
-      <a class="app-nav-link {% nav_active request 'scans:list' 'scans:detail' %}" href="{% url 'scans:list' %}">Scans</a>
-      <a class="app-nav-link {% nav_active request 'findings:list' 'findings:detail' %}" href="{% url 'findings:list' %}">Findings</a>
-      <a class="app-nav-link" href="{% url 'accounts:profile' %}">Settings</a>
-      <div class="my-2 border-t border-line"></div>
-      <a class="app-nav-link" href="{% url 'core:landing' %}">Marketing site</a>
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="app-nav-link w-full text-left">Log out</button>
-      </form>
+
+    <nav id="app-nav" class="app-sidebar-nav hidden flex-1 flex-col px-2 pb-3 lg:flex" aria-label="Product">
+      <div class="flex flex-col gap-0.5">
+        <p class="app-nav-label">Workspace</p>
+        <a class="app-nav-link {% nav_active request 'dashboard:home' 'dashboard:stats_partial' %}" href="{% url 'dashboard:home' %}">Dashboard</a>
+        <a class="app-nav-link {% nav_active request 'repositories:list' 'repositories:detail' 'repositories:connect' %}" href="{% url 'repositories:list' %}">Repositories</a>
+        <a class="app-nav-link {% nav_active request 'scans:list' 'scans:detail' %}" href="{% url 'scans:list' %}">Scans</a>
+        <a class="app-nav-link {% nav_active request 'findings:list' 'findings:detail' %}" href="{% url 'findings:list' %}">Findings</a>
+      </div>
+
+      <div class="mt-auto border-t border-line pt-3">
+        <p class="app-nav-label !pt-0">Account</p>
+        <a class="app-nav-link" href="{% url 'core:landing' %}">Marketing site</a>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="app-nav-link w-full text-left">Log out</button>
+        </form>
+      </div>
     </nav>
   </aside>
 
-  <div class="flex min-w-0 flex-col">
-    <header class="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2 sm:px-6">
-      <p class="truncate text-sm text-ink-muted">
-        {% if user.is_authenticated %}
-          Signed in as <span class="text-ink">{% firstof user.github_account.login user.get_username %}</span>
-        {% endif %}
-      </p>
-      <a href="{% url 'accounts:profile' %}" class="text-sm">Profile</a>
+  <div class="app-content">
+    <header class="app-topbar">
+      {% if user.is_authenticated %}
+        <div class="flex min-w-0 items-center gap-2.5">
+          {% if user.github_account.avatar_url %}
+            <img
+              src="{{ user.github_account.avatar_url }}"
+              alt=""
+              width="28"
+              height="28"
+              class="app-avatar"
+            >
+          {% endif %}
+          <span class="truncate text-sm font-medium text-ink">{% firstof user.github_account.login user.get_username %}</span>
+        </div>
+      {% endif %}
     </header>
 
     {% include "partials/flash_messages.html" %}
 
-    <main id="main" class="flex-1 px-4 py-5 sm:px-6">
+    <main id="main" class="app-main">
       {% block content %}{% endblock %}
     </main>
   </div>

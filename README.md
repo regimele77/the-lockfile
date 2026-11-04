@@ -40,7 +40,7 @@ Django apps live under `apps/`:
 | `dashboard` | Signed-in overview (HTMX-refreshed stats) |
 | `repositories` | Repo sync, connect picker, list/detail; `Repository` model |
 | `scans` | Scan pipeline (queue, Celery clone, scanners, status UI) |
-| `findings` | Finding list/detail with severity filters (HTMX); `Finding` model |
+| `findings` | Finding list/detail with status triage and filters (HTMX); `Finding` model |
 
 Templates: project-level `templates/` (base, layouts, partials) plus per-app templates. Product UI extends `layouts/app.html`.
 
@@ -78,6 +78,7 @@ Templates: project-level `templates/` (base, layouts, partials) plus per-app tem
    7. Open a repo and click **Run scan** (or use **Scan selected** on the list)
    8. Watch [/scans/](http://localhost:8000/scans/) move queued -> running -> completed or failed
    9. Open the scan detail page and [/findings/](http://localhost:8000/findings/) for plain-language results
+  10. On a finding detail page, mark **Resolved** or **Ignore**, confirm the default findings list and dashboard **Open critical** count update, and use **View on GitHub** when a file path and commit/branch exist
 
 Stop with `Ctrl+C`, or run in the background with `docker compose up --build -d` and stop later with `docker compose down`.
 
@@ -174,6 +175,31 @@ There is no username/password login. Identity and repo access come from a
   Findings are stored on the Scan and shown on scan detail, repo detail, and
   `/findings/`.
 
+### Findings
+
+- Each finding has a workflow status: `open` (default), `resolved`, or `ignored`.
+  Triage from the finding detail page or compact actions on the list
+  (Mark resolved, Ignore, Reopen). POSTs are CSRF-protected and scoped to the
+  signed-in user's tracked repos.
+- `/findings/` defaults to **open** findings. Status tabs cover open / resolved /
+  ignored / all. Severity tabs still work. Additional filters: category,
+  repository, and scan (query params, composed together, preserved in HTMX).
+- Dashboard counts are limited to your tracked repos. **Open findings** and
+  **Open critical** only include `status=open`.
+- When a later scan recreates the same issue (`rule_id` + `file_path`, with a
+  title fallback), ignored/resolved triage is carried forward so noise is not
+  resurrected as open duplicates.
+- Findings with a file path link to GitHub when `commit_sha` or `default_branch`
+  is available (`/blob/{ref}/{path}` with optional `#L{line}`). Secrets findings
+  may include a line number.
+- Empty states on dashboard, repositories, scans, and findings guide the loop:
+  connect GitHub -> pick repos -> run a scan -> review findings.
+
+**How to test triage:** run a scan -> open a finding -> mark ignored or resolved
+-> confirm dashboard open critical and the default findings list update -> use
+the GitHub file link when path/commit exist -> sign in as a fresh user (or clear
+installations/selection) to hit guided empty states.
+
 ### Scanners
 
 Hook: `apps/scans/services/scanners/__init__.py` → `run_scanners(scan, workspace)`.
@@ -201,13 +227,14 @@ Git history secret scanning is not implemented yet (working tree only). Always
 read the Explanation and Recommendation on a finding before rotating credentials
 or changing production config.
 
-**How to test:** select a repo → **Run scan** → open the scan detail page and
+**How to test:** select a repo -> **Run scan** -> open the scan detail page and
 `/findings/` for severity, category, summary, and fix steps.
 
 ### Frontend (Tailwind)
 
-- Source: `static/src/input.css` (design tokens + `@source` for Django templates)
-- Output: `static/css/app.css`
+- Source: `static/src/input.css` (design tokens, type/spacing scale, shared component classes + `@source` for Django templates)
+- Output: `static/css/app.css` (always commit a rebuilt `app.css` with UI changes)
+- Shared classes: `btn-primary` / `btn-secondary` / `btn-ghost` / `btn-danger`, `field`, `panel` / `notice`, `page-header`, `empty-state`, `data-table` / `table-wrap`, `filter-tab`, severity/status badges, `app-nav-link`, marketing `site-wrap`
 - The `frontend` Compose service runs `npm install && npm run watch` so CSS rebuilds when templates or the input CSS change.
 - One-shot production build:
 
@@ -215,7 +242,7 @@ or changing production config.
   docker compose run --rm frontend npm run build
   ```
 
-Fonts are system stacks (Tahoma / Consolas). No webfont CDN. HTMX is pinned via CDN; CSRF is sent on HTMX requests via `hx-headers` on `<body>`.
+Fonts are system UI stacks (`-apple-system` / `Segoe UI` / `system-ui`, with Consolas / `ui-monospace` for code). No webfont CDN. HTMX is pinned via CDN; CSRF is sent on HTMX requests via `hx-headers` on `<body>`.
 
 ### Useful URLs
 
@@ -236,7 +263,8 @@ Fonts are system stacks (Tahoma / Consolas). No webfont CDN. HTMX is pinned via 
 | `/repositories/<id>/scan/` | POST: start scan for one repo |
 | `/scans/` | Scan list |
 | `/scans/<id>/` | Scan detail (status + errors; HTMX poll) |
-| `/findings/` | Findings (+ `?severity=` HTMX filter) |
+| `/findings/` | Findings (`?status=`, `?severity=`, `?category=`, `?repository=`, `?scan=`) |
+| `/findings/<id>/status/` | POST: resolve / ignore / reopen |
 | `/admin/` | Django admin (models registered) |
 
 ## License

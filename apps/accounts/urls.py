@@ -7,7 +7,6 @@ from apps.accounts.views import (
     GithubOAuthStartView,
     GithubSetupCallbackView,
     LockfileLogoutView,
-    ProfileView,
 )
 from apps.accounts.webhook_views import GithubWebhookView
 
@@ -21,5 +20,4 @@ urlpatterns = [
     path("github/install/", GithubInstallStartView.as_view(), name="github_install"),
     path("github/webhook/", GithubWebhookView.as_view(), name="github_webhook"),
     path("logout/", LockfileLogoutView.as_view(), name="logout"),
-    path("profile/", ProfileView.as_view(), name="profile"),
 ]

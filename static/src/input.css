@@ -4,21 +4,35 @@
 @source "../../apps/**/templates/**/*.html";
 
 /* ------------------------------------------------------------------
-   The Lockfile: plain, slightly older institutional look.
-   Tahoma throughout (simple system UI face). Consolas for code.
+   The Lockfile design system
+   Calm security product chrome: Apple Settings / connect-page craft,
+   not marketing maximalism. Clarity, shared tokens, light motion.
+
+   Type scale
+     display  ~2.5-3rem / 1.15   brand + marketing hero
+     title    ~1.5-1.875rem / 1.25  page h1
+     heading  ~1.125rem / 1.35   section h2
+     body     ~0.875-1rem / 1.5
+     caption  ~0.75rem / 1.4
+     mono     Consolas / ui-monospace for paths and ids
+
+   Spacing rhythm: 4 / 8 / 12 / 16 / 24 / 32 / 48
+   Radius: 6px (small, not pill). Elevation: borders first; one soft shadow max.
+   Fonts: system UI (no webfont CDN). Navy accent family preserved.
 ------------------------------------------------------------------ */
 @theme {
-  --font-display: Tahoma, "Segoe UI", Geneva, sans-serif;
-  --font-sans: Tahoma, "Segoe UI", Geneva, sans-serif;
-  --font-mono: Consolas, "Courier New", Courier, monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, Consolas, "Cascadia Mono", "Courier New", monospace;
 
-  --color-ink: #222222;
-  --color-ink-muted: #555555;
-  --color-ink-faint: #777777;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #5c5c5c;
+  --color-ink-faint: #8a8a8a;
   --color-paper: #f7f7f4;
-  --color-paper-deep: #ebebe6;
+  --color-paper-deep: #ecece7;
   --color-surface: #ffffff;
-  --color-line: #c8c8c0;
+  --color-line: #d4d4cc;
+  --color-line-strong: #b8b8ae;
   --color-accent: #1e3a5f;
   --color-accent-hover: #152a45;
   --color-accent-soft: #e8eef4;
@@ -30,6 +44,10 @@
   --color-ok: #2d5a3d;
   --color-warn: #8a6d00;
   --color-danger: #990000;
+
+  --radius-control: 6px;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04);
+  --ease-ui: 180ms ease;
 }
 
 @layer base {
@@ -46,6 +64,7 @@
     --danger: var(--color-danger);
     --warn: var(--color-warn);
     --ok: var(--color-ok);
+    --radius: var(--radius-control);
   }
 
   html {
@@ -56,15 +75,40 @@
     html {
       scroll-behavior: auto;
     }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
-    @apply bg-paper text-ink font-sans;
-    min-height: 100vh;
+    @apply flex min-h-screen flex-col bg-paper text-ink font-sans antialiased;
+  }
+
+  body > main {
+    flex: 1 1 auto;
+  }
+
+  /* App shell: lock the viewport; only .app-main scrolls. */
+  html:has(body.app-shell) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body.app-shell {
+    display: block;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
 
   a {
     color: var(--color-accent);
+    transition: color var(--ease-ui);
   }
 
   a:hover {
@@ -77,7 +121,7 @@
     outline-offset: 2px;
   }
 
-  /* Pointer on every clickable control (buttons default to cursor: default in browsers). */
+  /* Pointer on every clickable control (buttons default to cursor: default). */
   a[href],
   button:not(:disabled):not([aria-disabled="true"]),
   input:is([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="file"]):not(:disabled),
@@ -101,18 +145,137 @@
 }
 
 @layer components {
+  /* ---- Type ---- */
+  .type-display {
+    @apply font-display text-ink;
+    font-size: clamp(2.25rem, 4vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .type-title {
+    @apply font-display text-ink;
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+
+  .type-heading {
+    @apply font-display text-lg text-ink;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+
+  .type-body {
+    @apply text-sm text-ink;
+    line-height: 1.5;
+  }
+
+  .type-caption {
+    @apply text-xs text-ink-faint;
+    line-height: 1.4;
+  }
+
+  .type-mono {
+    @apply font-mono text-xs;
+  }
+
+  /* ---- Layout ---- */
+  .site-wrap {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .app-frame {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .app-frame {
+      grid-template-columns: 220px minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+  }
+
+  .app-sidebar {
+    @apply flex flex-col border-b border-line bg-surface;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .app-sidebar {
+      @apply border-b-0 border-r;
+      height: 100%;
+      max-height: 100dvh;
+    }
+  }
+
+  .app-sidebar-nav {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-content {
+    @apply flex min-h-0 min-w-0 flex-col bg-paper;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .app-topbar {
+    @apply flex shrink-0 items-center justify-end gap-3 border-b border-line
+      bg-surface px-4 py-2 sm:px-6 lg:px-8;
+  }
+
+  .app-main {
+    @apply w-full flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .app-shell .flash-stack {
+    @apply shrink-0 px-4 pb-0 pt-3 sm:px-6 lg:px-8;
+  }
+
+  .content-measure {
+    @apply mx-auto w-full max-w-xl;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50
+      focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-ink;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-line);
+  }
+
+  /* ---- Buttons ---- */
   .btn,
   .btn-primary,
   .btn-secondary,
-  .btn-ghost {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 px-4 py-2 text-sm no-underline;
-    border-radius: 2px;
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-2
+      px-3.5 py-2 text-sm font-medium no-underline;
+    border-radius: var(--radius-control);
+    transition:
+      background-color var(--ease-ui),
+      border-color var(--ease-ui),
+      color var(--ease-ui),
+      opacity var(--ease-ui);
   }
 
   .btn:hover,
   .btn-primary:hover,
   .btn-secondary:hover,
-  .btn-ghost:hover {
+  .btn-ghost:hover,
+  .btn-danger:hover {
     text-decoration: none;
   }
 
@@ -129,7 +292,7 @@
   }
 
   .btn-secondary:hover {
-    @apply border-accent text-accent;
+    @apply border-line-strong bg-paper text-ink;
   }
 
   .btn-ghost {
@@ -140,10 +303,25 @@
     @apply bg-paper-deep text-ink;
   }
 
+  .btn-danger {
+    @apply border border-danger bg-surface text-danger;
+  }
+
+  .btn-danger:hover {
+    @apply bg-danger/5 text-danger;
+  }
+
+  .btn-sm {
+    @apply min-h-8 px-2.5 py-1.5 text-xs;
+  }
+
+  /* ---- Forms ---- */
   .field {
     @apply w-full border border-line bg-surface px-3 py-2 text-sm text-ink
       placeholder:text-ink-faint;
-    border-radius: 2px;
+    min-height: 2.25rem;
+    border-radius: var(--radius-control);
+    transition: border-color var(--ease-ui);
   }
 
   .field:focus {
@@ -152,7 +330,24 @@
   }
 
   .label {
-    @apply mb-1 block text-sm text-ink;
+    @apply mb-1.5 block text-sm font-medium text-ink;
+  }
+
+  .form-group {
+    @apply flex flex-col;
+  }
+
+  .help-text {
+    @apply mt-1.5 text-xs text-ink-faint;
+  }
+
+  /* ---- Flash ---- */
+  .flash-stack {
+    @apply w-full space-y-2 px-4 pt-4 sm:px-6;
+  }
+
+  body:not(.app-shell) .flash-stack {
+    @apply mx-auto max-w-6xl lg:px-8;
   }
 
   .flash,
@@ -160,8 +355,8 @@
   .flash-error,
   .flash-info,
   .flash-warning {
-    @apply flex items-start justify-between gap-3 border px-3 py-2 text-sm;
-    border-radius: 2px;
+    @apply flex items-start justify-between gap-3 border px-3.5 py-2.5 text-sm;
+    border-radius: var(--radius-control);
   }
 
   .flash-success {
@@ -180,6 +375,7 @@
     @apply border-warn bg-warn/10 text-warn;
   }
 
+  /* ---- Badges ---- */
   .badge-critical,
   .badge-high,
   .badge-medium,
@@ -188,51 +384,207 @@
   .status-queued,
   .status-running,
   .status-completed,
-  .status-failed {
-    @apply inline-flex items-center border px-1.5 py-0.5 text-xs;
-    border-radius: 2px;
+  .status-failed,
+  .status-open,
+  .status-resolved,
+  .status-ignored {
+    @apply inline-flex items-center border px-1.5 py-0.5 text-xs font-medium leading-none;
+    border-radius: var(--radius-control);
   }
 
   .badge-critical {
-    @apply border-critical text-critical;
+    @apply border-critical/40 bg-critical/5 text-critical;
   }
   .badge-high {
-    @apply border-high text-high;
+    @apply border-high/40 bg-high/5 text-high;
   }
   .badge-medium {
-    @apply border-medium text-medium;
+    @apply border-medium/40 bg-medium/5 text-medium;
   }
   .badge-low {
-    @apply border-low text-low;
+    @apply border-low/40 bg-low/5 text-low;
   }
   .badge-info {
-    @apply border-info text-info;
+    @apply border-info/30 bg-paper text-info;
   }
 
   .status-queued {
-    @apply border-line text-ink-muted;
+    @apply border-line bg-paper text-ink-muted;
   }
   .status-running {
-    @apply border-accent text-accent;
+    @apply border-accent/40 bg-accent-soft text-accent;
   }
   .status-completed {
-    @apply border-ok text-ok;
+    @apply border-ok/40 bg-ok/5 text-ok;
   }
   .status-failed {
-    @apply border-danger text-danger;
+    @apply border-danger/40 bg-danger/5 text-danger;
+  }
+  .status-open {
+    @apply border-accent/40 bg-accent-soft text-accent;
+  }
+  .status-resolved {
+    @apply border-ok/40 bg-ok/5 text-ok;
+  }
+  .status-ignored {
+    @apply border-line bg-paper text-ink-muted;
+  }
+
+  /* ---- Surfaces ---- */
+  .panel {
+    @apply border border-line bg-surface;
+    border-radius: var(--radius-control);
+    padding: 1rem;
+  }
+
+  .panel-muted {
+    @apply border border-line bg-paper;
+    border-radius: var(--radius-control);
+    padding: 1rem;
+  }
+
+  .notice {
+    @apply border border-line bg-surface text-sm text-ink-muted;
+    border-radius: var(--radius-control);
+    padding: 1rem 1.125rem;
+  }
+
+  .notice-title {
+    @apply text-ink font-medium;
   }
 
   .empty-state {
-    @apply flex flex-col items-center justify-center border border-line bg-surface px-6 py-12 text-center;
-    border-radius: 2px;
+    @apply flex flex-col items-center justify-center border border-line bg-surface
+      px-6 py-14 text-center;
+    border-radius: var(--radius-control);
+  }
+
+  .empty-state .type-heading {
+    max-width: 28rem;
+  }
+
+  .empty-state p {
+    max-width: 28rem;
   }
 
   .page-header {
-    @apply mb-6 flex flex-col gap-2 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between;
+    @apply mb-5 flex flex-col gap-3 border-b border-line pb-4
+      sm:flex-row sm:items-end sm:justify-between;
   }
 
+  .page-header-actions {
+    @apply flex shrink-0 flex-wrap items-center justify-end gap-2;
+  }
+
+  .page-header-eyebrow {
+    @apply mb-1 text-xs font-medium tracking-wide text-ink-faint uppercase;
+  }
+
+  .section-heading {
+    @apply font-display text-base text-ink;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+
+  .section-lede {
+    @apply mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted;
+  }
+
+  /* ---- Tables ---- */
+  .data-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .data-table th {
+    @apply border border-line bg-paper-deep px-3 py-2.5 text-left text-xs
+      font-medium tracking-wide text-ink-muted;
+  }
+
+  .data-table td {
+    @apply border border-line bg-surface px-3 py-2.5 text-ink align-middle;
+  }
+
+  .data-table tbody tr {
+    transition: background-color var(--ease-ui);
+  }
+
+  .data-table tbody tr:hover td {
+    background-color: var(--color-paper);
+  }
+
+  .data-table .cell-mono {
+    @apply font-mono text-xs text-ink-faint;
+  }
+
+  .data-table .cell-actions {
+    @apply text-right whitespace-nowrap;
+  }
+
+  .table-wrap {
+    @apply border border-line;
+    border-radius: var(--radius-control);
+  }
+
+  .table-wrap .data-table {
+    margin: -1px;
+    width: calc(100% + 2px);
+  }
+
+  /* ---- Filter panel ---- */
+  .filter-panel {
+    @apply mb-5 border border-line bg-surface p-4;
+    border-radius: var(--radius-control);
+  }
+
+  .filter-panel-grid {
+    @apply grid gap-4 lg:grid-cols-2;
+  }
+
+  .filter-group {
+    @apply min-w-0;
+  }
+
+  .filter-group-label {
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-ink-faint;
+  }
+
+  .filter-bar {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .filter-tab {
+    @apply inline-flex min-h-8 cursor-pointer items-center justify-center
+      border border-transparent bg-transparent px-2.5 py-1.5 text-xs
+      font-medium text-ink-muted no-underline;
+    border-radius: var(--radius-control);
+    transition:
+      background-color var(--ease-ui),
+      border-color var(--ease-ui),
+      color var(--ease-ui);
+  }
+
+  .filter-tab:hover {
+    @apply bg-paper-deep text-ink no-underline;
+  }
+
+  .filter-tab[aria-selected="true"],
+  .filter-tab.active {
+    @apply border-line bg-paper text-ink;
+  }
+
+  .filter-selects {
+    @apply mt-4 grid gap-3 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  /* ---- App nav ---- */
   .app-nav-link {
-    @apply flex cursor-pointer items-center gap-2 border-l-2 border-transparent px-3 py-1.5 text-sm text-ink no-underline;
+    @apply flex min-h-9 cursor-pointer items-center gap-2 px-3 py-2
+      text-sm text-ink-muted no-underline;
+    border-radius: var(--radius-control);
+    transition:
+      background-color var(--ease-ui),
+      color var(--ease-ui);
   }
 
   .app-nav-link:hover {
@@ -240,33 +592,47 @@
   }
 
   .app-nav-link.active {
-    @apply border-accent font-bold text-ink;
-    background: var(--color-accent-soft);
+    @apply bg-accent-soft font-medium text-ink;
   }
 
-  .data-table {
-    @apply w-full border-collapse text-left text-sm;
+  .app-nav-label {
+    @apply px-3 pb-1 pt-3 text-[0.65rem] font-medium tracking-wider
+      text-ink-faint uppercase;
   }
 
-  .data-table th {
-    @apply border border-line bg-paper-deep px-3 py-2 text-left text-xs font-normal text-ink;
-  }
-
-  .data-table td {
-    @apply border border-line px-3 py-2 text-ink;
+  .app-avatar {
+    @apply size-7 shrink-0 border border-line bg-paper object-cover;
+    border-radius: var(--radius-control);
   }
 
   .lockfile-mark {
     @apply h-6 w-6 shrink-0 text-accent;
   }
 
-  .site-wrap {
-    @apply w-full px-4 sm:px-6 lg:px-8;
+  .brand-lockup {
+    @apply flex shrink-0 items-center gap-2.5 text-ink no-underline;
+  }
+
+  .brand-lockup:hover {
+    @apply text-ink no-underline;
+  }
+
+  .brand-name {
+    @apply font-display text-lg font-semibold tracking-tight text-ink;
+  }
+
+  /* ---- Marketing nav ---- */
+  .site-header {
+    @apply border-b border-line bg-surface;
   }
 
   .site-nav-link {
-    @apply inline-flex shrink-0 cursor-pointer items-center px-3 py-2 text-ink-muted no-underline;
-    border-radius: 2px;
+    @apply inline-flex shrink-0 cursor-pointer items-center px-3 py-2
+      text-sm text-ink-muted no-underline;
+    border-radius: var(--radius-control);
+    transition:
+      background-color var(--ease-ui),
+      color var(--ease-ui);
   }
 
   .site-nav-link:hover {
@@ -274,8 +640,7 @@
   }
 
   .site-nav-link.active {
-    @apply font-bold text-ink;
-    background: var(--color-accent-soft);
+    @apply bg-accent-soft font-medium text-ink;
   }
 
   @media (min-width: 1024px) {
@@ -289,59 +654,103 @@
   }
 
   .footer-heading {
-    @apply text-xs font-bold uppercase tracking-wide text-ink;
+    @apply text-xs font-medium tracking-wider text-ink-faint uppercase;
   }
 
+  .site-footer a {
+    @apply text-ink-muted no-underline;
+    transition: color var(--ease-ui);
+  }
+
+  .site-footer a:hover {
+    @apply text-ink underline;
+  }
+
+  /* ---- Marketing hero ---- */
   .hero-grid {
-    @apply grid gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-12;
+    @apply grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16;
   }
 
   .hero-brand {
-    @apply font-display text-4xl text-ink sm:text-5xl;
+    @apply font-display text-ink;
+    font-size: clamp(2.25rem, 4vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 
   .hero-rule {
     border: 0;
-    border-top: 3px double var(--color-accent);
-    margin: 1.25rem 0;
-    max-width: 12rem;
+    border-top: 1px solid var(--color-accent);
+    margin: 1.25rem 0 1.5rem;
+    max-width: 3rem;
+    opacity: 0.85;
   }
 
   .hero-headline {
-    @apply font-display text-2xl text-ink sm:text-3xl;
+    @apply font-display text-ink;
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-weight: 500;
   }
 
   .hero-lede {
-    @apply mt-4 text-base leading-relaxed text-ink-muted;
+    @apply mt-4 max-w-md text-base leading-relaxed text-ink-muted;
   }
 
   .hero-aside {
-    @apply border border-line bg-surface p-4 sm:p-5;
-    border-radius: 2px;
+    @apply border border-line bg-surface;
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
   }
 
   .hero-aside-label {
-    @apply mb-3 border-b border-line pb-2 text-xs font-bold uppercase tracking-wide text-ink;
+    @apply border-b border-line bg-paper-deep px-4 py-2.5 text-xs
+      font-medium tracking-wide text-ink-muted;
   }
 
   .hero-aside-list {
-    @apply space-y-3 text-sm text-ink;
+    @apply divide-y divide-line text-sm text-ink;
   }
 
   .hero-aside-list li {
-    @apply flex flex-wrap items-center gap-2;
+    @apply flex flex-wrap items-center gap-2.5 px-4 py-3;
   }
 
   .section-item {
-    @apply border border-line bg-paper p-4;
-    border-radius: 2px;
+    @apply border border-line bg-paper p-5;
+    border-radius: var(--radius-control);
+    transition: border-color var(--ease-ui);
+  }
+
+  .section-item:hover {
+    border-color: var(--color-line-strong);
+  }
+
+  .code-block {
+    @apply overflow-x-auto border border-line bg-surface p-4
+      font-mono text-xs leading-relaxed text-ink-muted;
+    border-radius: var(--radius-control);
+  }
+
+  .legal-prose {
+    @apply max-w-2xl;
   }
 
   .legal-prose h2 {
-    @apply text-ink;
+    @apply font-display text-lg text-ink;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    font-weight: 600;
   }
 
   .legal-prose a {
     text-decoration: underline;
+  }
+
+  .legal-prose section + section {
+    @apply mt-8;
   }
 }

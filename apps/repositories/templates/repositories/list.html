@@ -3,16 +3,17 @@
 {% block title %}Repositories{% endblock %}
 
 {% block content %}
+{% if repositories %}
+{% include "partials/page_header.html" with title="Repositories" subtitle="Repositories you selected to track on this instance." submit_form="repo-bulk-form" submit_label="Scan selected" secondary_url="/repositories/connect/" secondary_label="Connect repositories" %}
+{% else %}
 {% include "partials/page_header.html" with title="Repositories" subtitle="Repositories you selected to track on this instance." action_url="/repositories/connect/" action_label="Connect repositories" %}
+{% endif %}
 
 {% if repositories %}
-<form method="post" action="{% url 'scans:start_bulk' %}">
+<form id="repo-bulk-form" method="post" action="{% url 'scans:start_bulk' %}">
   {% csrf_token %}
-  <div class="mb-3 flex flex-wrap items-center gap-3">
-    <button type="submit" class="btn-primary text-sm">Scan selected</button>
-    <p class="text-sm text-ink-muted">Starts a scan for each checked repo that is not already queued or running.</p>
-  </div>
-  <div class="overflow-x-auto">
+  <p class="mb-4 text-sm text-ink-muted">Check repos below, then scan selected. Skips repos that are already queued or running.</p>
+  <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
@@ -22,7 +23,7 @@
           <th scope="col">Name</th>
           <th scope="col">Visibility</th>
           <th scope="col">Added</th>
-          <th scope="col">Actions</th>
+          <th scope="col" class="cell-actions">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -34,11 +35,11 @@
             <td><a href="{% url 'repositories:detail' repo.pk %}">{{ repo.full_name }}</a></td>
             <td class="text-ink-muted">{% if repo.is_private %}Private{% else %}Public{% endif %}</td>
             <td class="text-ink-muted">{{ repo.created_at|date:"M j, Y" }}</td>
-            <td>
+            <td class="cell-actions">
               <button
                 type="submit"
                 formaction="{% url 'repositories:scan_start' repo.pk %}"
-                class="btn-secondary text-sm"
+                class="btn-secondary btn-sm"
               >Run scan</button>
             </td>
           </tr>
@@ -46,8 +47,11 @@
       </tbody>
     </table>
   </div>
+  <div class="mt-4">
+    <button type="submit" class="btn-primary">Scan selected</button>
+  </div>
 </form>
 {% else %}
-  {% include "partials/empty_state.html" with title="No repositories connected" description="Install the GitHub App and choose which repos to scan. Data stays on this host." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
+  {% include "partials/empty_state.html" with title=empty_guidance.title description=empty_guidance.description action_url=empty_guidance.action_url action_label=empty_guidance.action_label %}
 {% endif %}
 {% endblock %}

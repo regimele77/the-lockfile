@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import logging
 import re
+import subprocess
 import time
 from collections.abc import Iterator
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 
@@ -162,12 +163,38 @@ def rel_path(workspace: Path, path: Path) -> str:
         return path.name
 
 
+def path_in_git_head(workspace: Path, relative_path: str) -> bool:
+    """
+    Return True when relative_path exists in HEAD (file or tree).
+
+    Used to avoid GitHub blob/tree links that 404 for gitignored, local-only,
+    or otherwise untracked paths (for example a local `.env`).
+    """
+    rel = (relative_path or "").strip().lstrip("/")
+    if not rel or ".." in PurePosixPath(rel).parts:
+        return False
+    if not (workspace / ".git").exists():
+        return False
+    try:
+        completed = subprocess.run(
+            ["git", "cat-file", "-e", f"HEAD:{rel}"],
+            cwd=str(workspace),
+            check=False,
+            capture_output=True,
+            timeout=15,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return False
+    return completed.returncode == 0
+
+
 def iter_workspace_files(
     workspace: Path,
     *,
     budget: ScannerBudget | None = None,
     suffixes: frozenset[str] | None = None,
     names: frozenset[str] | None = None,
+    max_bytes: int | None = None,
 ) -> Iterator[Path]:
     """
     Yield text-ish files under workspace with skip rules and size/count caps.
@@ -179,7 +206,7 @@ def iter_workspace_files(
         return
 
     file_limit = max_files()
-    size_limit = max_file_bytes()
+    size_limit = max_bytes if max_bytes is not None else max_file_bytes()
     seen = 0
 
     for dirpath, dirnames, filenames in _safe_walk(root):

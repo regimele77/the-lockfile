@@ -4,89 +4,90 @@
 {% block title %}{{ repository.full_name }}{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. Run a scan to clone the default branch and produce findings." %}
+{% if scan_in_progress %}
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. A scan is already queued or running." secondary_url="/scans/" secondary_label="View scans" %}
+{% else %}
+<form id="repo-scan-form" method="post" action="{% url 'repositories:scan_start' repository.pk %}" class="hidden" aria-hidden="true">
+  {% csrf_token %}
+</form>
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. Run a scan to clone the default branch and produce findings." submit_form="repo-scan-form" submit_label="Run scan" %}
+{% endif %}
 
 <div class="grid gap-6 lg:grid-cols-3">
-  <dl class="space-y-3 border border-line bg-surface p-4 text-sm lg:col-span-1">
+  <dl class="panel space-y-4 text-sm lg:col-span-1">
     <div>
-      <dt class="text-ink-faint">Short name</dt>
+      <dt class="type-caption">Short name</dt>
       <dd class="mt-1">{{ repository.name }}</dd>
     </div>
     <div>
-      <dt class="text-ink-faint">Visibility</dt>
+      <dt class="type-caption">Visibility</dt>
       <dd class="mt-1">{% if repository.is_private %}Private{% else %}Public{% endif %}</dd>
     </div>
     <div>
-      <dt class="text-ink-faint">GitHub ID</dt>
-      <dd class="mt-1 font-mono text-xs">{% firstof repository.github_id "n/a" %}</dd>
-    </div>
-    <div>
-      <dt class="text-ink-faint">Installation</dt>
+      <dt class="type-caption">Installation</dt>
       <dd class="mt-1">{{ repository.installation.account_login }}</dd>
     </div>
     <div>
-      <dt class="text-ink-faint">Tracked</dt>
+      <dt class="type-caption">Tracked</dt>
       <dd class="mt-1">{% if repository.tracked_at %}{{ repository.tracked_at|date:"M j, Y H:i" }}{% else %}{{ repository.created_at|date:"M j, Y H:i" }}{% endif %}</dd>
     </div>
-    <div class="pt-2">
+    <div class="border-t border-line pt-4">
       {% if scan_in_progress %}
       <p class="text-sm text-ink-muted">A scan is already queued or running.</p>
-      <a href="{% url 'scans:list' %}" class="btn-secondary mt-3 inline-flex text-sm">View scans</a>
+      <a href="{% url 'scans:list' %}" class="btn-secondary btn-sm mt-3 inline-flex">View scans</a>
       {% else %}
-      <form method="post" action="{% url 'repositories:scan_start' repository.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="btn-primary text-sm">Run scan</button>
-      </form>
+      <button type="submit" form="repo-scan-form" class="btn-primary btn-sm">Run scan</button>
       {% endif %}
     </div>
   </dl>
 
-  <div class="lg:col-span-2 space-y-8">
+  <div class="space-y-10 lg:col-span-2">
     <div>
       <div class="mb-3 flex items-center justify-between gap-3">
-        <h2 class="font-display text-lg text-ink">Recent scans</h2>
+        <h2 class="section-heading">Recent scans</h2>
         <a href="{% url 'scans:list' %}" class="text-sm">All scans</a>
       </div>
 
       {% if recent_scans %}
-      <div class="overflow-x-auto">
+      <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th scope="col">Scan</th>
+              <th scope="col" class="w-12">#</th>
+              <th scope="col">Created</th>
               <th scope="col">Status</th>
               <th scope="col">Trigger</th>
-              <th scope="col">Created</th>
             </tr>
           </thead>
           <tbody>
             {% for scan in recent_scans %}
             <tr>
-              <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
+              <td class="text-ink-muted"><a href="{% url 'scans:detail' scan.pk %}" class="text-ink-muted no-underline hover:text-ink hover:underline">{% scan_number scan %}</a></td>
+              <td><a href="{% url 'scans:detail' scan.pk %}">{{ scan.created_at|date:"M j, Y H:i" }}</a></td>
               <td>{% status_badge scan.status %}</td>
               <td class="text-ink-muted">{% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}</td>
-              <td class="text-ink-muted">{{ scan.created_at|date:"M j, H:i" }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
       {% else %}
-      {% include "partials/empty_state.html" with title="No scans for this repository" description="Click Run scan to clone the default branch and run security scanners." %}
+      {% include "partials/empty_state.html" with title="No scans for this repository" description="Click Run scan to clone the default branch and run security scanners. Findings appear here after the worker finishes." %}
       {% endif %}
     </div>
 
     <div>
       <div class="mb-3 flex items-center justify-between gap-3">
-        <h2 class="font-display text-lg text-ink">Recent findings</h2>
-        <a href="{% url 'findings:list' %}" class="text-sm">All findings</a>
+        <h2 class="section-heading">Recent findings</h2>
+        <a href="{% url 'findings:list' %}?repository={{ repository.pk }}" class="text-sm">Open findings</a>
       </div>
       {% if recent_findings %}
-      <div class="overflow-x-auto">
+      <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
               <th scope="col">Severity</th>
+              <th scope="col">Status</th>
               <th scope="col">Title</th>
               <th scope="col">Category</th>
               <th scope="col">Scan</th>
@@ -96,16 +97,19 @@
             {% for finding in recent_findings %}
             <tr>
               <td>{% severity_badge finding.severity %}</td>
+              <td>{% status_badge finding.status %}</td>
               <td><a href="{% url 'findings:detail' finding.pk %}">{{ finding.title }}</a></td>
               <td class="text-ink-muted">{{ finding.get_category_display }}</td>
-              <td class="text-ink-muted"><a href="{% url 'scans:detail' finding.scan_id %}">#{{ finding.scan_id }}</a></td>
+              <td class="text-ink-muted">
+                <a href="{% url 'scans:detail' finding.scan_id %}">Scan {% scan_number finding.scan %}</a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
       {% else %}
-      {% include "partials/empty_state.html" with title="No findings yet" description="Findings from the latest scans appear here. Run a scan to populate this list." %}
+      {% include "partials/empty_state.html" with title="No open findings" description="Open findings from recent scans appear here. Run a scan, or review resolved and ignored items on the findings page." action_url="/findings/?status=all" action_label="All findings" %}
       {% endif %}
     </div>
   </div>

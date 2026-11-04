@@ -14,6 +14,7 @@ from django.conf import settings
 
 from apps.findings.models import Finding
 from apps.scans.services.scanners.common import (
+    iter_workspace_files,
     new_budget,
     read_text_file,
     rel_path,
@@ -138,32 +139,31 @@ def scan_dependencies(*, workspace: Path) -> list[RawFinding]:
 def _collect_packages(workspace: Path, *, budget) -> list[PackageRef]:
     found: list[PackageRef] = []
     seen: set[tuple[str, str, str]] = set()
+    parsers = {
+        "package-lock.json": _parse_package_lock,
+        "yarn.lock": _parse_yarn_lock,
+        "requirements.txt": _parse_requirements,
+        "poetry.lock": _parse_poetry_lock,
+        "Pipfile.lock": _parse_pipfile_lock,
+        "go.mod": _parse_go_mod,
+        "Cargo.lock": _parse_cargo_lock,
+        "Gemfile.lock": _parse_gemfile_lock,
+    }
 
-    for path in workspace.rglob("*"):
-        if budget.expired():
-            break
-        if not path.is_file() or path.name not in _MANIFEST_NAMES:
-            continue
-        # Skip nested vendor copies.
-        parts = {p.lower() for p in path.parts}
-        if parts & {"node_modules", "vendor", ".git", "dist", "build"}:
+    # Walk with shared skip rules so we never attribute packages to paths
+    # outside the cloned workspace (e.g. vendor/node_modules copies).
+    for path in iter_workspace_files(
+        workspace,
+        budget=budget,
+        names=_MANIFEST_NAMES,
+        max_bytes=2_000_000,
+    ):
+        parser = parsers.get(path.name)
+        if parser is None:
             continue
         relative = rel_path(workspace, path)
         text = read_text_file(path, max_bytes=2_000_000)
         if text is None:
-            continue
-        parsers = {
-            "package-lock.json": _parse_package_lock,
-            "yarn.lock": _parse_yarn_lock,
-            "requirements.txt": _parse_requirements,
-            "poetry.lock": _parse_poetry_lock,
-            "Pipfile.lock": _parse_pipfile_lock,
-            "go.mod": _parse_go_mod,
-            "Cargo.lock": _parse_cargo_lock,
-            "Gemfile.lock": _parse_gemfile_lock,
-        }
-        parser = parsers.get(path.name)
-        if parser is None:
             continue
         for pkg in parser(text, relative):
             key = (pkg.ecosystem, pkg.name.lower(), pkg.version)

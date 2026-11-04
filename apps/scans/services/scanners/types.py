@@ -16,3 +16,6 @@ class RawFinding:
     recommendation: str
     file_path: str = ""
     rule_id: str = ""
+    line_number: int | None = None
+    # When None, persist decides via git (path present in HEAD).
+    github_linkable: bool | None = None

@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -16,6 +18,9 @@ STATUS_CLASSES = {
     "running": "status-running",
     "completed": "status-completed",
     "failed": "status-failed",
+    "open": "status-open",
+    "resolved": "status-resolved",
+    "ignored": "status-ignored",
 }
 
 
@@ -29,12 +34,23 @@ def severity_badge(severity: str):
     }
 
 
+STATUS_LABELS = {
+    "queued": "Queued",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed",
+    "open": "Open",
+    "resolved": "Resolved",
+    "ignored": "Ignored",
+}
+
+
 @register.inclusion_tag("partials/status_badge.html")
 def status_badge(status: str):
     key = (status or "").lower()
     return {
         "status": key,
-        "label": key.capitalize() if key else "Unknown",
+        "label": STATUS_LABELS.get(key, key.capitalize() if key else "Unknown"),
         "css_class": STATUS_CLASSES.get(key, "status-queued"),
     }
 
@@ -48,6 +64,33 @@ def nav_active(request, *url_names: str) -> str:
     return "active" if current in url_names else ""
 
 
+@register.simple_tag(takes_context=True)
+def findings_filter_qs(context, **overrides) -> str:
+    """
+    Build a findings list query string, preserving active filters.
+
+    Pass clear_<name>=1 (or an empty override) to drop a filter. Default status
+    is open and is omitted from the URL.
+    """
+    request = context.get("request")
+    get = request.GET if request is not None else {}
+    params = {}
+    for key in ("status", "severity", "category", "repository", "scan"):
+        if key in overrides:
+            value = overrides[key]
+        else:
+            value = get.get(key, "")
+        value = ("" if value is None else str(value)).strip()
+        if key == "status":
+            if not value:
+                value = "open"
+            if value == "open":
+                continue
+        if value:
+            params[key] = value
+    return urlencode(params)
+
+
 @register.filter
 def severity_bar_width(severity: str) -> str:
     widths = {
@@ -58,6 +101,19 @@ def severity_bar_width(severity: str) -> str:
         "info": "15%",
     }
     return widths.get((severity or "").lower(), "10%")
+
+
+@register.simple_tag(takes_context=True)
+def scan_number(context, scan) -> int:
+    """1-based scan ordinal for the signed-in user (1 = newest). Not a DB id."""
+    request = context.get("request")
+    if request is None or not getattr(request, "user", None):
+        return 0
+    if not request.user.is_authenticated or scan is None:
+        return 0
+    from apps.scans.services.display import scan_ordinal
+
+    return scan_ordinal(request.user, scan)
 
 
 @register.simple_tag

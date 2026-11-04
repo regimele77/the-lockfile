@@ -1,18 +1,20 @@
 {% extends "layouts/app.html" %}
 {% load lockfile_tags %}
 
-{% block title %}Scan #{{ scan.pk }}{% endblock %}
+{% block title %}Scan {{ scan_number }} · {{ scan.repository.full_name }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <p class="mb-1 text-xs text-ink-faint">Scan</p>
-    <h1 class="font-display text-2xl text-ink sm:text-3xl">Scan #{{ scan.pk }}</h1>
-    <p class="mt-1 text-sm text-ink-muted">
-      <a href="{% url 'repositories:detail' scan.repository_id %}">{{ scan.repository.full_name }}</a>
+  <div class="min-w-0">
+    <p class="page-header-eyebrow">Scan {{ scan_number }}</p>
+    <h1 class="type-title">{{ scan.repository.full_name }}</h1>
+    <p class="mt-1.5 text-sm text-ink-muted">
+      {% if scan.created_at %}Started {{ scan.created_at|date:"M j, Y H:i" }}{% endif %}
+      <span aria-hidden="true">·</span>
+      <a href="{% url 'repositories:detail' scan.repository_id %}">Repository</a>
     </p>
   </div>
-  <a href="{% url 'scans:list' %}" class="btn-secondary shrink-0 text-sm">All scans</a>
+  <a href="{% url 'scans:list' %}" class="btn-secondary shrink-0 btn-sm">All scans</a>
 </div>
 
 {% include "scans/partials/status_panel.html" %}

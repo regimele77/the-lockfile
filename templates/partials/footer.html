@@ -1,11 +1,11 @@
 {% load lockfile_tags %}
-<footer class="site-footer mt-auto border-t-2 border-line bg-surface">
-  <div class="site-wrap py-10">
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+<footer class="site-footer mt-auto border-t border-line bg-surface">
+  <div class="site-wrap py-12">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
       <div class="sm:col-span-2 lg:col-span-1">
-        <a href="{% url 'core:landing' %}" class="flex items-center gap-2 text-ink no-underline hover:no-underline">
+        <a href="{% url 'core:landing' %}" class="brand-lockup">
           {% lockfile_mark %}
-          <span class="font-display text-lg text-ink">The Lockfile</span>
+          <span class="brand-name">The Lockfile</span>
         </a>
         <p class="mt-3 text-sm text-ink-muted">{{ SITE_TAGLINE }}</p>
         <p class="mt-2 text-xs text-ink-faint">Runs on your own hosts.</p>
@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div class="mt-8 flex flex-col gap-2 border-t border-line pt-4 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+    <div class="mt-10 flex flex-col gap-2 border-t border-line pt-5 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
       <p>&copy; {% now "Y" %} The Lockfile</p>
       <p>Source-available. Run it yourself.</p>
     </div>

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<article class="site-wrap py-10 sm:py-14">
-  <header class="mb-8 border-b border-line pb-4">
-    <p class="text-xs text-ink-faint">Legal</p>
-    <h1 class="mt-1 font-display text-3xl text-ink">{% block page_title %}{% endblock %}</h1>
+<article class="site-wrap py-12 sm:py-16">
+  <header class="mb-10 border-b border-line pb-5">
+    <p class="page-header-eyebrow">Legal</p>
+    <h1 class="type-title">{% block page_title %}{% endblock %}</h1>
     {% block page_lede %}{% endblock %}
   </header>
-  <div class="legal-prose space-y-6 text-sm leading-relaxed text-ink-muted">
+  <div class="legal-prose space-y-2 text-sm leading-relaxed text-ink-muted">
     {% block legal_body %}{% endblock %}
   </div>
 </article>

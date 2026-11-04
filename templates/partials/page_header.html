@@ -1,14 +1,43 @@
 <div class="page-header">
-  <div>
+  <div class="min-w-0">
     {% if eyebrow %}
-      <p class="mb-1 text-xs text-ink-faint">{{ eyebrow }}</p>
+      <p class="page-header-eyebrow">{{ eyebrow }}</p>
     {% endif %}
-    <h1 class="font-display text-2xl text-ink sm:text-3xl">{{ title }}</h1>
+    <h1 class="type-title">{{ title }}</h1>
     {% if subtitle %}
-      <p class="mt-1 text-sm text-ink-muted">{{ subtitle }}</p>
+      <p class="mt-1.5 text-sm leading-relaxed text-ink-muted">{{ subtitle }}</p>
     {% endif %}
   </div>
   {% if action_url and action_label %}
-    <a href="{{ action_url }}" class="btn-primary shrink-0">{{ action_label }}</a>
+    <div class="page-header-actions">
+      {% if secondary_url and secondary_label %}
+        <a href="{{ secondary_url }}" class="btn-secondary shrink-0">{{ secondary_label }}</a>
+      {% endif %}
+      {% if submit_form and submit_label %}
+        <button
+          type="submit"
+          form="{{ submit_form }}"
+          class="btn-primary shrink-0"
+          {% if submit_disabled %}disabled{% endif %}
+        >{{ submit_label }}</button>
+      {% endif %}
+      <a href="{{ action_url }}" class="btn-primary shrink-0">{{ action_label }}</a>
+    </div>
+  {% elif submit_form and submit_label %}
+    <div class="page-header-actions">
+      {% if secondary_url and secondary_label %}
+        <a href="{{ secondary_url }}" class="btn-secondary shrink-0">{{ secondary_label }}</a>
+      {% endif %}
+      <button
+        type="submit"
+        form="{{ submit_form }}"
+        class="btn-primary shrink-0"
+        {% if submit_disabled %}disabled{% endif %}
+      >{{ submit_label }}</button>
+    </div>
+  {% elif secondary_url and secondary_label %}
+    <div class="page-header-actions">
+      <a href="{{ secondary_url }}" class="btn-secondary shrink-0">{{ secondary_label }}</a>
+    </div>
   {% endif %}
 </div>

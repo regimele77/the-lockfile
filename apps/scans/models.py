@@ -43,7 +43,7 @@ class Scan(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f"Scan #{self.pk} · {self.repository.full_name} · {self.status}"
+        return f"{self.repository.full_name} · {self.status}"
 
     @property
     def is_active(self) -> bool:

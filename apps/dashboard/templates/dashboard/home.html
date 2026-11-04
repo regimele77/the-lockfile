@@ -3,7 +3,17 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Dashboard" subtitle="Repositories, scans, and findings on this instance." action_url="/repositories/connect/" action_label="Connect a repo" %}
+{% include "partials/page_header.html" with title="Dashboard" subtitle="Overview of your tracked repositories, scans, and open findings." action_url="/repositories/connect/" action_label="Connect a repo" %}
+
+{% if show_next_step %}
+  <div class="notice mb-8">
+    <p class="notice-title">{{ guidance.title }}</p>
+    <p class="mt-1">{{ guidance.description }}</p>
+    <p class="mt-4">
+      <a href="{{ guidance.action_url }}" class="btn-secondary btn-sm">{{ guidance.action_label }}</a>
+    </p>
+  </div>
+{% endif %}
 
 <div
   id="dashboard-stats"
@@ -16,16 +26,16 @@
 
 <section class="mt-10">
   <div class="mb-4 flex items-center justify-between gap-3">
-    <h2 class="font-display text-lg text-ink">Recent scans</h2>
+    <h2 class="section-heading">Recent scans</h2>
     <a href="{% url 'scans:list' %}" class="text-sm">View all</a>
   </div>
 
   {% if recent_scans %}
-    <div class="overflow-x-auto">
+    <div class="table-wrap">
       <table class="data-table">
         <thead>
           <tr>
-            <th scope="col">Scan</th>
+            <th scope="col" class="w-12">#</th>
             <th scope="col">Repository</th>
             <th scope="col">Status</th>
             <th scope="col">Created</th>
@@ -35,8 +45,8 @@
           {% load lockfile_tags %}
           {% for scan in recent_scans %}
             <tr>
-              <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
-              <td>{{ scan.repository.full_name }}</td>
+              <td class="text-ink-muted"><a href="{% url 'scans:detail' scan.pk %}" class="text-ink-muted no-underline hover:text-ink hover:underline">{% scan_number scan %}</a></td>
+              <td><a href="{% url 'scans:detail' scan.pk %}">{{ scan.repository.full_name }}</a></td>
               <td>{% status_badge scan.status %}</td>
               <td class="text-ink-muted">{{ scan.created_at|date:"M j, Y H:i" }}</td>
             </tr>
@@ -45,7 +55,7 @@
       </table>
     </div>
   {% else %}
-    {% include "partials/empty_state.html" with title="No scans yet" description="Connect a GitHub App and pick repos. Scan results will show up here." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
+    {% include "partials/empty_state.html" with title=guidance.title description=guidance.description action_url=guidance.action_url action_label=guidance.action_label %}
   {% endif %}
 </section>
 {% endblock %}

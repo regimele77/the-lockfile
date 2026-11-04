@@ -187,6 +187,7 @@ def scan_secrets(*, workspace: Path) -> list[RawFinding]:
                         ),
                         file_path=relative,
                         rule_id=f"secret.{rule_id}",
+                        line_number=_line_number_at(text, match.start()),
                     )
                 )
                 budget.record_emit()
@@ -222,6 +223,7 @@ def scan_secrets(*, workspace: Path) -> list[RawFinding]:
                     ),
                     file_path=relative,
                     rule_id="secret.high_entropy_assignment",
+                    line_number=_line_number_at(text, match.start()),
                 )
             )
             budget.record_emit()
@@ -237,6 +239,13 @@ _KNOWN_DUMMY_SECRETS = frozenset(
         "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
     }
 )
+
+
+def _line_number_at(text: str, offset: int) -> int:
+    """1-based line number for a byte/char offset in text."""
+    if offset <= 0:
+        return 1
+    return text.count("\n", 0, offset) + 1
 
 
 def _looks_like_secret(value: str) -> bool:

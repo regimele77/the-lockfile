@@ -1,22 +1,112 @@
-<div class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Severity filter">
-  <a
-    href="{% url 'findings:list' %}"
-    class="btn {% if not active_severity %}btn-primary{% else %}btn-secondary{% endif %} text-xs"
-    role="tab"
-    aria-selected="{% if not active_severity %}true{% else %}false{% endif %}"
+{% load lockfile_tags %}
+
+<div class="filter-panel">
+  <div class="filter-panel-grid">
+    <div class="filter-group">
+      <p class="filter-group-label" id="filter-status-label">Status</p>
+      <div class="filter-bar" role="tablist" aria-labelledby="filter-status-label">
+        <a
+          href="{% url 'findings:list' %}?{% findings_filter_qs status='open' %}"
+          class="filter-tab{% if active_status == 'open' %} active{% endif %}"
+          role="tab"
+          aria-selected="{% if active_status == 'open' %}true{% else %}false{% endif %}"
+          hx-get="{% url 'findings:list' %}?{% findings_filter_qs status='open' %}"
+          hx-target="#findings-panel"
+          hx-push-url="true"
+        >Open</a>
+        {% for value, label in status_choices %}
+          {% if value != 'open' %}
+          <a
+            href="{% url 'findings:list' %}?{% findings_filter_qs status=value %}"
+            class="filter-tab{% if active_status == value %} active{% endif %}"
+            role="tab"
+            aria-selected="{% if active_status == value %}true{% else %}false{% endif %}"
+            hx-get="{% url 'findings:list' %}?{% findings_filter_qs status=value %}"
+            hx-target="#findings-panel"
+            hx-push-url="true"
+          >{{ label }}</a>
+          {% endif %}
+        {% endfor %}
+        <a
+          href="{% url 'findings:list' %}?{% findings_filter_qs status='all' %}"
+          class="filter-tab{% if active_status == 'all' %} active{% endif %}"
+          role="tab"
+          aria-selected="{% if active_status == 'all' %}true{% else %}false{% endif %}"
+          hx-get="{% url 'findings:list' %}?{% findings_filter_qs status='all' %}"
+          hx-target="#findings-panel"
+          hx-push-url="true"
+        >All</a>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <p class="filter-group-label" id="filter-severity-label">Severity</p>
+      <div class="filter-bar" role="tablist" aria-labelledby="filter-severity-label">
+        <a
+          href="{% url 'findings:list' %}?{% findings_filter_qs severity='' %}"
+          class="filter-tab{% if not active_severity %} active{% endif %}"
+          role="tab"
+          aria-selected="{% if not active_severity %}true{% else %}false{% endif %}"
+          hx-get="{% url 'findings:list' %}?{% findings_filter_qs severity='' %}"
+          hx-target="#findings-panel"
+          hx-push-url="true"
+        >All</a>
+        {% for value, label in severity_choices %}
+          <a
+            href="{% url 'findings:list' %}?{% findings_filter_qs severity=value %}"
+            class="filter-tab{% if active_severity == value %} active{% endif %}"
+            role="tab"
+            aria-selected="{% if active_severity == value %}true{% else %}false{% endif %}"
+            hx-get="{% url 'findings:list' %}?{% findings_filter_qs severity=value %}"
+            hx-target="#findings-panel"
+            hx-push-url="true"
+          >{{ label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <form
+    method="get"
+    action="{% url 'findings:list' %}"
+    class="filter-selects"
     hx-get="{% url 'findings:list' %}"
     hx-target="#findings-panel"
     hx-push-url="true"
-  >All</a>
-  {% for value, label in severity_choices %}
-    <a
-      href="?severity={{ value }}"
-      class="btn {% if active_severity == value %}btn-primary{% else %}btn-secondary{% endif %} text-xs"
-      role="tab"
-      aria-selected="{% if active_severity == value %}true{% else %}false{% endif %}"
-      hx-get="{% url 'findings:list' %}?severity={{ value }}"
-      hx-target="#findings-panel"
-      hx-push-url="true"
-    >{{ label }}</a>
-  {% endfor %}
+    hx-trigger="change"
+  >
+    {% if active_status and active_status != 'open' %}
+      <input type="hidden" name="status" value="{{ active_status }}">
+    {% endif %}
+    {% if active_severity %}
+      <input type="hidden" name="severity" value="{{ active_severity }}">
+    {% endif %}
+    <div class="form-group">
+      <label for="filter-category" class="filter-group-label">Category</label>
+      <select id="filter-category" name="category" class="field">
+        <option value="">All categories</option>
+        {% for value, label in category_choices %}
+          <option value="{{ value }}" {% if active_category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="filter-repository" class="filter-group-label">Repository</label>
+      <select id="filter-repository" name="repository" class="field">
+        <option value="">All repositories</option>
+        {% for repo in filter_repositories %}
+          <option value="{{ repo.pk }}" {% if active_repository == repo.pk|stringformat:"s" %}selected{% endif %}>{{ repo.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="filter-scan" class="filter-group-label">Scan</label>
+      <select id="filter-scan" name="scan" class="field">
+        <option value="">All scans</option>
+        {% for scan in filter_scans %}
+          <option value="{{ scan.pk }}" {% if active_scan == scan.pk|stringformat:"s" %}selected{% endif %}>{{ forloop.counter }} · {{ scan.repository.full_name }} · {{ scan.created_at|date:"M j, H:i" }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
 </div>

@@ -94,7 +94,7 @@ def run_scanners(*, scan: Scan, workspace: Path) -> int:
             )
         )
 
-    count = replace_findings_for_scan(scan, collected)
+    count = replace_findings_for_scan(scan, collected, workspace=workspace)
     logger.info(
         "Scanners complete scan_id=%s findings_created=%s",
         scan.pk,

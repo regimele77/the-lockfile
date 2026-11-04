@@ -5,30 +5,70 @@
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <p class="mb-1 text-xs text-ink-faint">Finding</p>
-    <h1 class="font-display text-2xl text-ink sm:text-3xl">{{ finding.title }}</h1>
-    <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+  <div class="min-w-0">
+    <p class="page-header-eyebrow">Finding</p>
+    <h1 class="type-title">{{ finding.title }}</h1>
+    <p class="mt-2.5 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
       {% severity_badge finding.severity %}
+      {% status_badge finding.status %}
       <span>{{ finding.get_category_display }}</span>
       <span aria-hidden="true">·</span>
-      <a href="{% url 'scans:detail' finding.scan_id %}">Scan #{{ finding.scan_id }}</a>
+      <a href="{% url 'scans:detail' finding.scan_id %}">Scan {% scan_number finding.scan %}</a>
       <span aria-hidden="true">·</span>
       <a href="{% url 'repositories:detail' finding.scan.repository_id %}">{{ finding.scan.repository.full_name }}</a>
     </p>
   </div>
+  <div class="flex flex-wrap gap-2">
+    {% if finding.status == "open" %}
+      <form method="post" action="{% url 'findings:status' finding.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="resolve">
+        <button type="submit" class="btn-primary">Mark resolved</button>
+      </form>
+      <form method="post" action="{% url 'findings:status' finding.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="ignore">
+        <button type="submit" class="btn-secondary">Ignore</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'findings:status' finding.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reopen">
+        <button type="submit" class="btn-secondary">Reopen</button>
+      </form>
+    {% endif %}
+  </div>
 </div>
 
 <div class="grid gap-6 lg:grid-cols-2">
-  <section class="border border-line bg-surface p-4">
-    <h2 class="font-display text-lg text-ink">Explanation</h2>
+  <section class="panel">
+    <h2 class="section-heading">Explanation</h2>
     <p class="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">{{ finding.summary }}</p>
-    {% if finding.file_path %}
-      <p class="mt-4 font-mono text-xs text-ink-faint">{{ finding.file_path }}</p>
+    {% if finding.display_path %}
+      <div class="mt-5 border-t border-line pt-4">
+        <p class="type-caption">Path</p>
+        <p class="mt-1.5 type-mono text-ink-muted">
+          {% if finding.github_blob_url %}
+            <a href="{{ finding.github_blob_url }}" target="_blank" rel="noopener noreferrer">{{ finding.display_path }}</a>
+          {% else %}
+            {{ finding.display_path }}
+          {% endif %}
+        </p>
+        {% if finding.github_blob_url %}
+          <p class="mt-3">
+            <a
+              href="{{ finding.github_blob_url }}"
+              class="btn-secondary btn-sm"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View on GitHub</a>
+          </p>
+        {% endif %}
+      </div>
     {% endif %}
   </section>
-  <section class="border border-line bg-paper p-4">
-    <h2 class="font-display text-lg text-ink">Recommendation</h2>
+  <section class="panel-muted">
+    <h2 class="section-heading">Recommendation</h2>
     <p class="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">{{ finding.recommendation }}</p>
   </section>
 </div>

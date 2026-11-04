@@ -8,6 +8,7 @@ from pathlib import Path
 
 from celery import shared_task
 from django.conf import settings
+from django.db import IntegrityError
 from django.db.models import Max, Q
 from django.utils import timezone
 
@@ -102,6 +103,14 @@ def run_scan(self, scan_id: int) -> str:
         return "completed"
     except (CloneError, GitHubAppError) as exc:
         _fail_scan(scan, str(exc))
+        return "failed"
+    except IntegrityError:
+        logger.exception("Scan findings could not be saved scan_id=%s", scan_id)
+        _fail_scan(
+            scan,
+            "Scan failed while saving findings. Re-run the scan; if it keeps "
+            "failing, check worker logs for a database constraint error.",
+        )
         return "failed"
     except Exception:
         logger.exception("Unexpected scan failure scan_id=%s", scan_id)

@@ -1,13 +1,13 @@
 {% load lockfile_tags %}
-<header class="site-header border-b-2 border-accent bg-surface">
+<header class="site-header">
   <div class="site-wrap">
     <div class="flex items-center gap-4 py-3 lg:gap-8">
-      <a href="{% url 'core:landing' %}" class="flex shrink-0 items-center gap-2 text-ink no-underline hover:no-underline">
+      <a href="{% url 'core:landing' %}" class="brand-lockup">
         {% lockfile_mark %}
-        <span class="font-display text-xl text-ink">The Lockfile</span>
+        <span class="brand-name">The Lockfile</span>
       </a>
 
-      <nav class="site-nav hidden flex-1 items-center gap-1 lg:flex" aria-label="Primary">
+      <nav class="site-nav hidden flex-1 items-center gap-0.5 lg:flex" aria-label="Primary">
         <a href="{% url 'core:landing' %}" class="site-nav-link {% nav_active request 'core:landing' %}">Home</a>
         <a href="{% url 'core:landing' %}#what-it-finds" class="site-nav-link">What it finds</a>
         <a href="{% url 'core:landing' %}#why-self-hosted" class="site-nav-link">Why self-hosted</a>
@@ -17,13 +17,13 @@
 
       <div class="ml-auto flex shrink-0 items-center gap-2">
         {% if user.is_authenticated %}
-          <a href="{% url 'dashboard:home' %}" class="btn-primary text-sm">Open dashboard</a>
+          <a href="{% url 'dashboard:home' %}" class="btn-primary btn-sm">Open dashboard</a>
         {% else %}
-          <a href="{% url 'accounts:github' %}" class="btn-primary text-sm">Connect with GitHub</a>
+          <a href="{% url 'accounts:github' %}" class="btn-primary btn-sm">Connect with GitHub</a>
         {% endif %}
         <button
           type="button"
-          class="btn-ghost px-2 py-1 lg:hidden"
+          class="btn-ghost btn-sm lg:hidden"
           aria-controls="site-nav-mobile"
           aria-expanded="false"
           data-site-nav-toggle
@@ -33,7 +33,7 @@
 
     <nav
       id="site-nav-mobile"
-      class="site-nav -mx-4 hidden flex-col border-t border-line px-4 pb-3 pt-1 text-sm lg:hidden"
+      class="site-nav -mx-4 hidden flex-col border-t border-line px-4 pb-3 pt-1 lg:hidden"
       aria-label="Primary mobile"
     >
       <a href="{% url 'core:landing' %}" class="site-nav-link {% nav_active request 'core:landing' %}">Home</a>

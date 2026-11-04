@@ -6,6 +6,7 @@ from django.views.generic import DetailView, ListView
 
 from apps.repositories.models import Repository
 from apps.scans.models import Scan
+from apps.scans.services.display import scan_ordinal, user_scans_qs
 from apps.scans.services.enqueue import ScanStartError, enqueue_scan_for_repository
 
 
@@ -29,8 +30,14 @@ class ScanListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        repos = Repository.objects.selected_for_user(self.request.user)
-        return Scan.objects.filter(repository__in=repos).select_related("repository")
+        return user_scans_qs(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.findings.services.guidance import onboarding_guidance
+
+        context["empty_guidance"] = onboarding_guidance(self.request.user)
+        return context
 
 
 class ScanDetailView(LoginRequiredMixin, DetailView):
@@ -39,12 +46,12 @@ class ScanDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "scan"
 
     def get_queryset(self):
-        repos = Repository.objects.selected_for_user(self.request.user)
-        return Scan.objects.filter(repository__in=repos).select_related("repository")
+        return user_scans_qs(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["scan_findings"] = _ordered_findings(self.object)
+        context["scan_number"] = scan_ordinal(self.request.user, self.object)
         return context
 
 
@@ -98,7 +105,7 @@ class ScanStartView(LoginRequiredMixin, View):
 
         messages.success(
             request,
-            f"Scan #{scan.pk} queued for {repo.full_name}.",
+            f"Scan queued for {repo.full_name}.",
         )
         return redirect("scans:detail", pk=scan.pk)
 
