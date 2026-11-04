@@ -176,7 +176,7 @@ class GitHubOAuthClient:
             with urllib.request.urlopen(request, timeout=20) as response:
                 body = response.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
-            # Intentionally omit response body — may contain sensitive details.
+            # Intentionally omit response body; it may contain sensitive details.
             logger.warning("GitHub API HTTP error status=%s path=%s", exc.code, request.full_url)
             raise GitHubAppError("GitHub API request failed.") from exc
         except urllib.error.URLError as exc:

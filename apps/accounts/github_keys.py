@@ -12,7 +12,7 @@ def get_github_app_private_key() -> str:
     Return PEM private key material from env contents or a path.
 
     Installation access tokens expire in about one hour. Mint them on demand
-    with an App JWT; do not persist them as long-lived secrets.
+    with an App JWT. Do not persist them as long-lived secrets.
     """
     if settings.GITHUB_APP_PRIVATE_KEY:
         return settings.GITHUB_APP_PRIVATE_KEY

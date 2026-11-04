@@ -1,9 +1,10 @@
 {% extends "layouts/app.html" %}
+{% load lockfile_tags %}
 
 {% block title %}{{ repository.full_name }}{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title=repository.full_name subtitle="Repo detail. Scans and findings for this repo will show here." %}
+{% include "partials/page_header.html" with title=repository.full_name subtitle="Tracked repository. Run a scan to clone the default branch and prepare findings." %}
 
 <div class="grid gap-6 lg:grid-cols-3">
   <dl class="space-y-3 border border-line bg-surface p-4 text-sm lg:col-span-1">
@@ -20,13 +21,58 @@
       <dd class="mt-1 font-mono text-xs">{% firstof repository.github_id "n/a" %}</dd>
     </div>
     <div>
-      <dt class="text-ink-faint">Connected</dt>
-      <dd class="mt-1">{{ repository.created_at|date:"M j, Y H:i" }}</dd>
+      <dt class="text-ink-faint">Installation</dt>
+      <dd class="mt-1">{{ repository.installation.account_login }}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Tracked</dt>
+      <dd class="mt-1">{% if repository.tracked_at %}{{ repository.tracked_at|date:"M j, Y H:i" }}{% else %}{{ repository.created_at|date:"M j, Y H:i" }}{% endif %}</dd>
+    </div>
+    <div class="pt-2">
+      {% if scan_in_progress %}
+      <p class="text-sm text-ink-muted">A scan is already queued or running.</p>
+      <a href="{% url 'scans:list' %}" class="btn-secondary mt-3 inline-flex text-sm">View scans</a>
+      {% else %}
+      <form method="post" action="{% url 'repositories:scan_start' repository.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary text-sm">Run scan</button>
+      </form>
+      {% endif %}
     </div>
   </dl>
 
   <div class="lg:col-span-2">
-    {% include "partials/empty_state.html" with title="No scans for this repository" description="When scanning is wired up, you will start scans from here and open findings from the results." %}
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h2 class="font-display text-lg text-ink">Recent scans</h2>
+      <a href="{% url 'scans:list' %}" class="text-sm">All scans</a>
+    </div>
+
+    {% if recent_scans %}
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Scan</th>
+            <th scope="col">Status</th>
+            <th scope="col">Trigger</th>
+            <th scope="col">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in recent_scans %}
+          <tr>
+            <td><a href="{% url 'scans:detail' scan.pk %}">#{{ scan.pk }}</a></td>
+            <td>{% status_badge scan.status %}</td>
+            <td class="text-ink-muted">{% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}</td>
+            <td class="text-ink-muted">{{ scan.created_at|date:"M j, H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    {% include "partials/empty_state.html" with title="No scans for this repository" description="Click Run scan to queue the default branch. Findings scanners come in a later milestone." %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

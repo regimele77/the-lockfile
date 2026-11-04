@@ -1,31 +1,103 @@
 {% extends "layouts/app.html" %}
 
-{% block title %}Connect repository{% endblock %}
+{% block title %}Connect repositories{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Connect a GitHub App" subtitle="Installations grant The Lockfile access to the repos you choose." %}
+{% include "partials/page_header.html" with title="Connect repositories" subtitle="Choose which installed GitHub repos The Lockfile should track on this host." %}
 
-{% if installations %}
-<div class="border border-line bg-surface p-4">
-  <p class="text-sm text-ink">Installations connected</p>
-  <ul class="mt-3 space-y-2 text-sm text-ink-muted">
-    {% for installation in installations %}
-    <li>
-      <span class="text-ink">{{ installation.account_login }}</span>
-      <span class="text-ink-faint">({{ installation.account_type }} · id {{ installation.installation_id }})</span>
-    </li>
-    {% endfor %}
-  </ul>
-  <p class="mt-4 text-sm text-ink-muted">
-    Repo sync from these installations is next. You can still add
-    <code class="font-mono text-xs">Repository</code> rows in admin for UI work.
-  </p>
-  <div class="mt-4 flex flex-wrap gap-3">
-    <a href="{% url 'accounts:github_install' %}" class="btn-secondary text-sm">Add another installation</a>
-    <a href="{% url 'repositories:list' %}" class="btn-primary text-sm">View repositories</a>
+{% if not installations %}
+{% include "partials/empty_state.html" with title="GitHub App not installed" description="Install the GitHub App on your user or organization account, then pick the repos The Lockfile may access." action_url=install_url action_label="Install GitHub App" %}
+{% else %}
+
+<div class="mb-4 flex flex-wrap items-center gap-3 border border-line bg-surface p-4">
+  <div class="min-w-0 flex-1">
+    <p class="text-sm text-ink">Installations</p>
+    <ul class="mt-2 space-y-1 text-sm text-ink-muted">
+      {% for installation in installations %}
+      <li>
+        <span class="text-ink">{{ installation.account_login }}</span>
+        <span class="text-ink-faint">({{ installation.account_type }})</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'accounts:github_install' %}" class="btn-secondary text-sm">Add installation</a>
+    <form method="post" action="{% url 'repositories:connect' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="refresh">
+      <button type="submit" class="btn-secondary text-sm"{% if not app_credentials_ready %} title="Set GITHUB_APP_ID and private key in .env"{% endif %}>Refresh from GitHub</button>
+    </form>
   </div>
 </div>
+
+{% if not app_credentials_ready %}
+<p class="mb-4 text-sm text-ink-muted">
+  App ID and private key are required to list repositories. Set
+  <code class="font-mono text-xs">GITHUB_APP_ID</code> and
+  <code class="font-mono text-xs">GITHUB_APP_PRIVATE_KEY</code> (or path) in
+  <code class="font-mono text-xs">.env</code>, then refresh.
+</p>
+{% endif %}
+
+{% if repositories %}
+<form method="post" action="{% url 'repositories:connect' %}">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="save">
+
+  <div class="overflow-x-auto border border-line">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col" class="w-10">
+            <span class="sr-only">Track</span>
+          </th>
+          <th scope="col">Repository</th>
+          <th scope="col">Visibility</th>
+          <th scope="col">Installation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for repo in repositories %}
+        <tr>
+          <td>
+            <input
+              type="checkbox"
+              name="repo_ids"
+              value="{{ repo.github_id }}"
+              id="repo-{{ repo.github_id }}"
+              {% if repo.is_selected %}checked{% endif %}
+            >
+          </td>
+          <td>
+            <label for="repo-{{ repo.github_id }}" class="text-ink cursor-pointer">{{ repo.full_name }}</label>
+          </td>
+          <td class="text-ink-muted">{% if repo.is_private %}Private{% else %}Public{% endif %}</td>
+          <td class="text-ink-muted">{{ repo.installation.account_login }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4 flex flex-wrap items-center gap-3">
+    <button type="submit" class="btn-primary text-sm">Save selection</button>
+    <a href="{% url 'repositories:list' %}" class="btn-secondary text-sm">View tracked repos</a>
+    {% if selected_count %}
+    <p class="text-sm text-ink-muted">Currently tracking {{ selected_count }}.</p>
+    {% else %}
+    <p class="text-sm text-ink-muted">None selected yet.</p>
+    {% endif %}
+  </div>
+</form>
 {% else %}
-{% include "partials/empty_state.html" with title="GitHub App not installed" description="Install the GitHub App on your user or organization account, then pick the repos The Lockfile may access." action_url=install_url action_label="Install GitHub App" %}
+{% include "partials/empty_state.html" with title="No repositories returned" description="Refresh from GitHub after the App is installed with Metadata read access. Public and private repos both appear when the App can see them." %}
+<form method="post" action="{% url 'repositories:connect' %}" class="mt-4">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="refresh">
+  <button type="submit" class="btn-primary text-sm">Refresh from GitHub</button>
+</form>
+{% endif %}
+
 {% endif %}
 {% endblock %}

@@ -3,29 +3,50 @@
 {% block title %}Repositories{% endblock %}
 
 {% block content %}
-{% include "partials/page_header.html" with title="Repositories" subtitle="Repositories linked for scanning on this instance." action_url="/repositories/connect/" action_label="Connect repository" %}
+{% include "partials/page_header.html" with title="Repositories" subtitle="Repositories you selected to track on this instance." action_url="/repositories/connect/" action_label="Connect repositories" %}
 
 {% if repositories %}
+<form method="post" action="{% url 'scans:start_bulk' %}">
+  {% csrf_token %}
+  <div class="mb-3 flex flex-wrap items-center gap-3">
+    <button type="submit" class="btn-primary text-sm">Scan selected</button>
+    <p class="text-sm text-ink-muted">Starts a scan for each checked repo that is not already queued or running.</p>
+  </div>
   <div class="overflow-x-auto">
     <table class="data-table">
       <thead>
         <tr>
+          <th scope="col" class="w-10">
+            <span class="sr-only">Select</span>
+          </th>
           <th scope="col">Name</th>
           <th scope="col">Visibility</th>
           <th scope="col">Added</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for repo in repositories %}
           <tr>
+            <td>
+              <input type="checkbox" name="repo_ids" value="{{ repo.pk }}" id="bulk-repo-{{ repo.pk }}">
+            </td>
             <td><a href="{% url 'repositories:detail' repo.pk %}">{{ repo.full_name }}</a></td>
             <td class="text-ink-muted">{% if repo.is_private %}Private{% else %}Public{% endif %}</td>
             <td class="text-ink-muted">{{ repo.created_at|date:"M j, Y" }}</td>
+            <td>
+              <button
+                type="submit"
+                formaction="{% url 'repositories:scan_start' repo.pk %}"
+                class="btn-secondary text-sm"
+              >Run scan</button>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+</form>
 {% else %}
   {% include "partials/empty_state.html" with title="No repositories connected" description="Install the GitHub App and choose which repos to scan. Data stays on this host." action_url="/repositories/connect/" action_label="Connect a GitHub App" %}
 {% endif %}

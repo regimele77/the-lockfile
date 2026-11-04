@@ -12,23 +12,10 @@
       <a href="{% url 'repositories:detail' scan.repository_id %}">{{ scan.repository.full_name }}</a>
     </p>
   </div>
-  {% status_badge scan.status %}
+  <a href="{% url 'scans:list' %}" class="btn-secondary shrink-0 text-sm">All scans</a>
 </div>
 
-<dl class="mb-8 grid gap-4 border border-line bg-surface p-4 text-sm sm:grid-cols-3">
-  <div>
-    <dt class="text-ink-faint">Created</dt>
-    <dd class="mt-1">{{ scan.created_at|date:"M j, Y H:i" }}</dd>
-  </div>
-  <div>
-    <dt class="text-ink-faint">Started</dt>
-    <dd class="mt-1">{% if scan.started_at %}{{ scan.started_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
-  </div>
-  <div>
-    <dt class="text-ink-faint">Finished</dt>
-    <dd class="mt-1">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
-  </div>
-</dl>
+{% include "scans/partials/status_panel.html" %}
 
 {% with findings=scan.findings.all %}
   {% if findings %}
@@ -42,7 +29,14 @@
       {% endfor %}
     </ul>
   {% else %}
-    {% include "partials/empty_state.html" with title="No findings for this scan" description="When scanners are connected, results will list here with severity and fix notes." %}
+    {% if scan.status == "completed" %}
+      {% include "partials/empty_state.html" with title="No findings for this scan" description="Scanners are not implemented yet. A successful scan currently completes after clone with zero findings." %}
+    {% elif scan.status == "failed" %}
+      {% url 'repositories:detail' scan.repository_id as repo_url %}
+      {% include "partials/empty_state.html" with title="Scan failed" description="Fix the error above, then run another scan from the repository page." action_url=repo_url action_label="Back to repository" %}
+    {% else %}
+      {% include "partials/empty_state.html" with title="Findings appear when the scan finishes" description="Status updates automatically while the worker runs." %}
+    {% endif %}
   {% endif %}
 {% endwith %}
 {% endblock %}

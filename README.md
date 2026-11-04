@@ -36,10 +36,10 @@ Django apps live under `apps/`:
 | App | Role |
 |-----|------|
 | `core` | Landing page, health check, shared context processors and template tags |
-| `accounts` | GitHub App OAuth login, logout, profile, installation groundwork |
+| `accounts` | GitHub App OAuth login, installation tokens, webhooks |
 | `dashboard` | Signed-in overview (HTMX-refreshed stats) |
-| `repositories` | Repo list/detail and connect page; `Repository` model |
-| `scans` | Scan list/detail; `Scan` model with status |
+| `repositories` | Repo sync, connect picker, list/detail; `Repository` model |
+| `scans` | Scan pipeline (queue, Celery clone, status UI); scanners placeholder |
 | `findings` | Finding list/detail with severity filters (HTMX); `Finding` model |
 
 Templates: project-level `templates/` (base, layouts, partials) plus per-app templates. Product UI extends `layouts/app.html`.
@@ -68,7 +68,18 @@ Templates: project-level `templates/` (base, layouts, partials) plus per-app tem
    - Connect: [http://localhost:8000/accounts/github/](http://localhost:8000/accounts/github/)
    - Dashboard (after GitHub login): [http://localhost:8000/dashboard/](http://localhost:8000/dashboard/)
 
-6. Test auth: **Connect with GitHub** → authorize / install → land on `/dashboard/`.
+6. Test GitHub access, repo selection, and scans:
+   1. `docker compose up --build` (web, worker, and beat must all be up)
+   2. Open [Connect with GitHub](http://localhost:8000/accounts/github/) and authorize / install the App
+   3. Open [/repositories/connect/](http://localhost:8000/repositories/connect/)
+   4. Click **Refresh from GitHub** (or rely on the post-login sync)
+   5. Select the repos to track, click **Save selection**
+   6. Confirm them on [/repositories/](http://localhost:8000/repositories/)
+   7. Open a repo and click **Run scan** (or use **Scan selected** on the list)
+   8. Watch [/scans/](http://localhost:8000/scans/) move queued -> running -> completed or failed
+
+   Real vulnerability / secret / config scanners are still out of scope. A successful
+   scan currently completes after clone with zero findings.
 
 Stop with `Ctrl+C`, or run in the background with `docker compose up --build -d` and stop later with `docker compose down`.
 
@@ -83,45 +94,84 @@ There is no username/password login. Identity and repo access come from a
    - **Homepage URL**: `http://localhost:8000/`
    - **Callback URL**: `http://localhost:8000/accounts/github/callback/`
    - **Setup URL** (optional but recommended): `http://localhost:8000/accounts/github/setup/`
-   - **Webhook**: uncheck Active for local login-only work, or set a URL later
-3. Permissions (minimum for this milestone + future repo read):
+   - **Webhook URL**: `http://localhost:8000/accounts/github/webhook/`
+     - GitHub cannot reach localhost directly. For live webhook delivery, put a
+       tunnel in front (ngrok, Cloudflare Tunnel, etc.) and use the public HTTPS
+       URL ending in `/accounts/github/webhook/`.
+     - You can leave webhooks inactive locally and use **Refresh from GitHub**
+       on `/repositories/connect/` instead.
+3. Permissions (minimum for login, repo listing, and cloning):
    - **Account permissions → Email addresses**: Read-only
-   - **Repository permissions → Metadata**: Read-only (always required)
-   - Later for scanning: Contents (read), Dependabot alerts, etc. as needed
-4. **Where can this GitHub App be installed?** Any account, or only yours.
-5. Create the App, then note:
+   - **Repository permissions → Metadata**: Read-only (required to list repos)
+   - **Repository permissions → Contents**: Read-only (required to clone for scans)
+   - Later: Dependabot alerts and other scanner-specific permissions as needed
+4. Subscribe to webhook events (when webhooks are active):
+   - `installation`
+   - `installation_repositories`
+5. **Where can this GitHub App be installed?** Any account, or only yours.
+6. Create the App, then note:
    - App ID
    - Client ID
    - Generate a **Client secret**
-   - Generate a **private key** (PEM download) — needed later for installation tokens
+   - Generate a **private key** (PEM download). Required to mint installation
+     access tokens for repo sync
+   - Webhook secret (set the same value in `.env` as `GITHUB_APP_WEBHOOK_SECRET`)
    - App **slug** from the public page: `https://github.com/apps/<slug>`
-6. Put those values in `.env` (never commit real secrets):
+7. Put those values in `.env` (never commit real secrets):
 
    | Variable | Purpose |
    |----------|---------|
-   | `GITHUB_APP_ID` | App ID |
+   | `GITHUB_APP_ID` | App ID (JWT issuer for installation tokens) |
    | `GITHUB_APP_CLIENT_ID` | OAuth client ID |
    | `GITHUB_APP_CLIENT_SECRET` | OAuth client secret |
    | `GITHUB_APP_PRIVATE_KEY` | PEM text with `\n` for newlines (or use `GITHUB_APP_PRIVATE_KEY_PATH`) |
-   | `GITHUB_APP_WEBHOOK_SECRET` | Optional until webhooks are wired |
+   | `GITHUB_APP_WEBHOOK_SECRET` | HMAC secret for `X-Hub-Signature-256` |
    | `GITHUB_APP_NAME` | Public slug for install URLs |
    | `GITHUB_OAUTH_CALLBACK_URL` | Must match the App callback URL |
 
-7. Restart Compose after editing `.env` so `web` picks up the values.
+8. Restart Compose after editing `.env` so `web` picks up the values.
 
 **Callback host:** OAuth completion is restricted to the hostname in
 `GITHUB_OAUTH_CALLBACK_URL` (for local Docker: `localhost`).
 
-### Auth notes
+### Auth and repo access notes
 
 - Flow: `/accounts/github/` → `/accounts/github/start/` → GitHub →
   `/accounts/github/callback/` → Django session → `/dashboard/`
 - If the user has no App installations yet, they are sent to the install page;
-  `/accounts/github/setup/` records the `installation_id`.
+  `/accounts/github/setup/` records the `installation_id` and redirects to
+  `/repositories/connect/`.
 - User-to-server access tokens are stored on `GitHubAccount` and excluded from
-  admin/templates. Installation API tokens are short-lived (~1h); mint on demand
-  with the App private key later — do not treat them as permanent.
+  admin/templates.
+- Installation API tokens are short-lived (~1 hour). The app mints them on
+  demand with an App JWT (RS256) signed by the private key. They are not
+  persisted and must not be treated as permanent.
+- Repo sync upserts into `Repository` rows scoped to the `GitHubInstallation`
+  (and owning user). Selection (`is_selected`) is chosen on
+  `/repositories/connect/`.
+- Webhooks at `/accounts/github/webhook/` verify `X-Hub-Signature-256` and keep
+  installations / repo membership current. Manual **Refresh from GitHub** is
+  always available.
 - Logout: `POST /accounts/logout/` (existing session logout).
+
+### Scans
+
+- Start from a repository detail page (**Run scan**) or the repository list
+  (**Scan selected** / per-row **Run scan**). Only tracked repos for the
+  signed-in user are allowed. Duplicate queued/running scans for the same repo
+  are rejected.
+- Lifecycle: `queued` -> Celery worker -> `running` (clone) -> `completed` or
+  `failed`, with `started_at` / `finished_at`. Failure text is sanitized and
+  shown on the scan detail page (HTMX polls while active).
+- Clone uses a short-lived installation access token, shallow clone of the
+  default branch, and a per-scan workspace under `SCAN_WORKSPACE_ROOT` that is
+  always removed afterward. Tokens are never logged or stored on the Scan row.
+- Celery beat calls `enqueue_due_scans` on an interval (`SCAN_SCHEDULE_CHECK_HOURS`,
+  default 1h). Tracked repos whose last finished scan is older than
+  `SCAN_RESCHEDULE_HOURS` (default 24h), or never scanned, get a scheduled scan.
+  Active queued/running scans are skipped.
+- Scanner hook: `apps/scans/services/scanners.py` (`run_scanners`). Placeholder
+  for the next milestone.
 
 ### Frontend (Tailwind)
 
@@ -148,10 +198,13 @@ Fonts are system stacks (Tahoma / Consolas). No webfont CDN. HTMX is pinned via 
 | `/accounts/github/` | Start GitHub connect |
 | `/accounts/github/callback/` | OAuth callback |
 | `/accounts/github/setup/` | App setup / install callback |
+| `/accounts/github/webhook/` | GitHub App webhooks (signature verified) |
 | `/dashboard/` | App home |
-| `/repositories/` | Repo list |
-| `/repositories/connect/` | Installations connected |
+| `/repositories/` | Tracked (selected) repos; bulk scan |
+| `/repositories/connect/` | Sync + pick repos to track |
+| `/repositories/<id>/scan/` | POST: start scan for one repo |
 | `/scans/` | Scan list |
+| `/scans/<id>/` | Scan detail (status + errors; HTMX poll) |
 | `/findings/` | Findings (+ `?severity=` HTMX filter) |
 | `/admin/` | Django admin (models registered) |
 

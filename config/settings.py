@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -101,7 +102,7 @@ LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "core:landing"
 
 # GitHub App (user-to-server OAuth + installation groundwork)
-# Create an App at https://github.com/settings/apps/new — see README.
+# Create an App at https://github.com/settings/apps/new. See README.
 GITHUB_APP_ID = env("GITHUB_APP_ID", default="")
 GITHUB_APP_CLIENT_ID = env("GITHUB_APP_CLIENT_ID", default="")
 GITHUB_APP_CLIENT_SECRET = env("GITHUB_APP_CLIENT_SECRET", default="")
@@ -124,3 +125,20 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
+
+# Scan pipeline (clone workspace + scheduled re-scans)
+SCAN_WORKSPACE_ROOT = env("SCAN_WORKSPACE_ROOT", default="/tmp/lockfile-scans")
+SCAN_CLONE_TIMEOUT_SECONDS = env.int("SCAN_CLONE_TIMEOUT_SECONDS", default=300)
+SCAN_CLONE_DEPTH = env.int("SCAN_CLONE_DEPTH", default=1)
+SCAN_MAX_REPO_SIZE_MB = env.int("SCAN_MAX_REPO_SIZE_MB", default=500)
+# Re-scan tracked repos when the last finished scan is older than this many hours.
+SCAN_RESCHEDULE_HOURS = env.int("SCAN_RESCHEDULE_HOURS", default=24)
+# How often Celery beat checks for due repos (hours).
+SCAN_SCHEDULE_CHECK_HOURS = env.int("SCAN_SCHEDULE_CHECK_HOURS", default=1)
+
+CELERY_BEAT_SCHEDULE = {
+    "enqueue-due-scans": {
+        "task": "apps.scans.tasks.enqueue_due_scans",
+        "schedule": timedelta(hours=max(1, SCAN_SCHEDULE_CHECK_HOURS)),
+    },
+}

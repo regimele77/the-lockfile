@@ -31,9 +31,9 @@ class GitHubInstallation(models.Model):
     """
     A GitHub App installation linked to a Lockfile user.
 
-    installation_id is required later to mint installation access tokens
-    for repository APIs. Tokens are short-lived (~1h); mint on demand —
-    do not treat a stored installation token as permanent.
+    installation_id is required to mint installation access tokens for
+    repository APIs. Tokens are short-lived (~1h); mint on demand.
+    Do not treat a stored installation token as permanent.
     """
 
     installation_id = models.BigIntegerField(unique=True)

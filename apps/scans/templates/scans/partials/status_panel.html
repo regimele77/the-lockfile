@@ -1,0 +1,61 @@
+{% load lockfile_tags %}
+<div
+  id="scan-status"
+  class="mb-8"
+  {% if scan.is_active %}
+  hx-get="{% url 'scans:status_partial' scan.pk %}"
+  hx-trigger="every 2s"
+  hx-swap="outerHTML"
+  {% endif %}
+>
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm text-ink-muted">
+      {% if scan.trigger == "scheduled" %}Scheduled{% else %}Manual{% endif %}
+      scan
+      {% if scan.is_active %}(updating){% endif %}
+    </p>
+    {% status_badge scan.status %}
+  </div>
+
+  <dl class="grid gap-4 border border-line bg-surface p-4 text-sm sm:grid-cols-3">
+    <div>
+      <dt class="text-ink-faint">Created</dt>
+      <dd class="mt-1">{{ scan.created_at|date:"M j, Y H:i" }}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Started</dt>
+      <dd class="mt-1">{% if scan.started_at %}{{ scan.started_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
+    </div>
+    <div>
+      <dt class="text-ink-faint">Finished</dt>
+      <dd class="mt-1">{% if scan.finished_at %}{{ scan.finished_at|date:"M j, Y H:i" }}{% else %}n/a{% endif %}</dd>
+    </div>
+    {% if scan.commit_sha %}
+    <div>
+      <dt class="text-ink-faint">Commit</dt>
+      <dd class="mt-1 font-mono text-xs">{{ scan.commit_sha|truncatechars:12 }}</dd>
+    </div>
+    {% endif %}
+    {% if scan.default_branch %}
+    <div>
+      <dt class="text-ink-faint">Branch</dt>
+      <dd class="mt-1">{{ scan.default_branch }}</dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  {% if scan.status == "failed" and scan.error_message %}
+  <div class="mt-4 border border-line bg-surface p-4 text-sm">
+    <p class="text-ink-faint">Error</p>
+    <p class="mt-2 whitespace-pre-wrap text-ink">{{ scan.error_message }}</p>
+  </div>
+  {% elif scan.status == "completed" %}
+  <p class="mt-4 text-sm text-ink-muted">
+    Clone finished. Vulnerability scanners are not wired yet, so this scan may have zero findings.
+  </p>
+  {% elif scan.is_active %}
+  <p class="mt-4 text-sm text-ink-muted">
+    {% if scan.status == "queued" %}Waiting for the worker...{% else %}Cloning repository and preparing the workspace...{% endif %}
+  </p>
+  {% endif %}
+</div>

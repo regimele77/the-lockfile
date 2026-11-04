@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DetailView, ListView
 
 from apps.findings.models import Finding
+from apps.repositories.models import Repository
 
 
 class FindingListView(LoginRequiredMixin, ListView):
@@ -11,7 +12,10 @@ class FindingListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Finding.objects.select_related("scan", "scan__repository")
+        repos = Repository.objects.selected_for_user(self.request.user)
+        qs = Finding.objects.filter(scan__repository__in=repos).select_related(
+            "scan", "scan__repository"
+        )
         severity = self.request.GET.get("severity", "").lower()
         if severity in Finding.Severity.values:
             qs = qs.filter(severity=severity)
@@ -35,4 +39,7 @@ class FindingDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "finding"
 
     def get_queryset(self):
-        return Finding.objects.select_related("scan", "scan__repository")
+        repos = Repository.objects.selected_for_user(self.request.user)
+        return Finding.objects.filter(scan__repository__in=repos).select_related(
+            "scan", "scan__repository"
+        )

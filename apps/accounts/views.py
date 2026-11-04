@@ -18,8 +18,32 @@ from apps.accounts.services.auth import (
     upsert_user_from_github,
 )
 from apps.accounts.services.github import GitHubAppError, GitHubOAuthClient
+from apps.accounts.services.installation_tokens import app_credentials_configured
+from apps.repositories.services.sync import sync_repositories_for_user
 
 logger = logging.getLogger(__name__)
+
+
+def _try_sync_repositories(request, user) -> None:
+    """Best-effort repo sync after login/setup. Failures become flash messages."""
+    if not app_credentials_configured():
+        return
+    if not GitHubInstallation.objects.filter(user=user).exists():
+        return
+    try:
+        result = sync_repositories_for_user(user)
+    except GitHubAppError as exc:
+        messages.warning(request, str(exc))
+        return
+    if result.errors:
+        for err in result.errors:
+            messages.warning(request, err)
+    elif result.upserted:
+        messages.info(
+            request,
+            f"Synced {result.upserted} repositories from GitHub. "
+            "Choose which to track on Connect repositories.",
+        )
 
 OAUTH_STATE_SESSION_KEY = "github_oauth_state"
 INSTALL_STATE_SESSION_KEY = "github_install_state"
@@ -121,6 +145,7 @@ class GithubOAuthCallbackView(View):
                 pass
 
         messages.success(request, f"Signed in as {profile.login}.")
+        _try_sync_repositories(request, user)
         return redirect(settings.LOGIN_REDIRECT_URL)
 
 
@@ -170,6 +195,7 @@ class GithubSetupCallbackView(View):
             messages.success(request, "GitHub App installation connected.")
 
         if user is not None:
+            _try_sync_repositories(request, user)
             return redirect("repositories:connect")
         return redirect("accounts:github")
 
