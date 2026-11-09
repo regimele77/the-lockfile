@@ -1,0 +1,84 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Account{% endblock %}
+
+{% block content %}
+{% include "partials/page_header.html" with title="Account" subtitle="GitHub connection health for this host. Fix access here when sync or scans fail for permission reasons." %}
+
+{% if permission_warning %}
+<div class="notice mb-6" role="status">
+  <p class="notice-title">Recent permission problem</p>
+  <p class="mt-2">{{ permission_warning }}</p>
+  <div class="mt-3 flex flex-wrap gap-2">
+    <a href="{{ permissions_url }}" class="btn-secondary btn-sm" rel="noopener noreferrer" target="_blank">Accept App permissions</a>
+    <a href="{{ reconnect_url }}" class="btn-secondary btn-sm">Re-connect GitHub</a>
+    <a href="{{ connect_repos_url }}" class="btn-secondary btn-sm">Refresh repositories</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="panel space-y-6 text-sm">
+  <div>
+    <p class="type-caption">GitHub login</p>
+    {% if github_linked %}
+    <p class="mt-1 text-ink">Linked as <span class="font-medium">{{ github_login }}</span></p>
+    {% else %}
+    <p class="mt-1 text-ink">Not linked.</p>
+    <a href="{{ reconnect_url }}" class="btn-primary btn-sm mt-3 inline-flex">Connect GitHub</a>
+    {% endif %}
+  </div>
+
+  <div class="border-t border-line pt-6">
+    <p class="type-caption">App installations</p>
+    {% if installation_count %}
+    <p class="mt-1 text-ink">{{ installation_count }} installation{% if installation_count != 1 %}s{% endif %}</p>
+    <ul class="mt-2 space-y-1 text-ink-muted">
+      {% for installation in installations %}
+      <li>
+        <span class="text-ink">{{ installation.account_login }}</span>
+        <span class="text-ink-faint">({{ installation.account_type }})</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mt-1 text-ink">None yet. Install the GitHub App to grant repository access.</p>
+    {% endif %}
+    <div class="mt-3 flex flex-wrap gap-2">
+      <a href="{{ install_url }}" class="btn-secondary btn-sm">Install / configure App</a>
+      <a href="{{ connect_repos_url }}" class="btn-secondary btn-sm">Connect repositories</a>
+    </div>
+  </div>
+
+  <div class="border-t border-line pt-6">
+    <p class="type-caption">Host App credentials</p>
+    {% if app_credentials_ready %}
+    <p class="mt-1 text-ink">App ID and private key are configured on this host.</p>
+    {% else %}
+    <p class="mt-1 text-ink">
+      App ID or private key is missing. Sync and clone need
+      <code class="type-mono">GITHUB_APP_ID</code> and
+      <code class="type-mono">GITHUB_APP_PRIVATE_KEY</code> in
+      <code class="type-mono">.env</code>.
+    </p>
+    {% endif %}
+  </div>
+
+  <div class="border-t border-line pt-6">
+    <p class="type-caption">Permission updates</p>
+    <p class="mt-1 text-ink-muted">
+      After the App owner changes repository permissions on GitHub, each
+      installation must accept the new permissions. Then refresh repositories
+      and re-run any failed scans.
+    </p>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <a href="{{ permissions_url }}" class="btn-secondary btn-sm" rel="noopener noreferrer" target="_blank">GitHub installations</a>
+      {% if app_public_url %}
+      <a href="{{ app_public_url }}" class="btn-secondary btn-sm" rel="noopener noreferrer" target="_blank">
+        {% if app_name %}App: {{ app_name }}{% else %}App page{% endif %}
+      </a>
+      {% endif %}
+      <a href="{{ reconnect_url }}" class="btn-secondary btn-sm">Re-connect GitHub</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

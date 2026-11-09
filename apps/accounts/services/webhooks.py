@@ -9,7 +9,7 @@ from typing import Any
 
 from django.conf import settings
 
-from apps.accounts.models import GitHubInstallation
+from apps.accounts.models import GitHubInstallation, WebhookDeliveryLog
 from apps.accounts.services.auth import record_installation
 from apps.repositories.services.sync import (
     delete_repositories_by_github_ids,
@@ -29,10 +29,22 @@ def verify_webhook_signature(*, body: bytes, signature_header: str | None) -> No
     Validate X-Hub-Signature-256 using GITHUB_APP_WEBHOOK_SECRET.
 
     GitHub sends: sha256=<hex hmac of raw body>
+
+    Behavior when the secret is empty:
+    - DEBUG=True: accept the delivery and log a warning (local tunnel convenience).
+    - DEBUG=False: fail closed (reject). Production-like settings always require
+      a configured secret and a valid signature.
     """
-    secret = settings.GITHUB_APP_WEBHOOK_SECRET
+    secret = (settings.GITHUB_APP_WEBHOOK_SECRET or "").strip()
     if not secret:
+        if settings.DEBUG:
+            logger.warning(
+                "GITHUB_APP_WEBHOOK_SECRET is empty; accepting unsigned webhook "
+                "(DEBUG only). Set the secret before any non-local deploy."
+            )
+            return
         raise WebhookVerificationError("Webhook secret is not configured.")
+
     if not signature_header or not signature_header.startswith("sha256="):
         raise WebhookVerificationError("Missing or malformed signature header.")
 
@@ -46,6 +58,34 @@ def verify_webhook_signature(*, body: bytes, signature_header: str | None) -> No
         raise WebhookVerificationError("Invalid webhook signature.")
 
 
+def record_webhook_delivery(
+    *,
+    delivery_id: str,
+    event: str,
+    action: str = "",
+    ok: bool = True,
+    status: str = "",
+    error: str = "",
+) -> None:
+    """Persist a lean delivery row without payload bodies."""
+    try:
+        WebhookDeliveryLog.objects.create(
+            delivery_id=(delivery_id or "")[:64],
+            event=(event or "")[:64],
+            action=(action or "")[:64],
+            ok=ok,
+            status=(status or "")[:64],
+            error=(error or "")[:255],
+        )
+    except Exception:
+        # Delivery logging must never break webhook handling.
+        logger.exception(
+            "Failed to persist webhook delivery log delivery=%s event=%s",
+            delivery_id,
+            event,
+        )
+
+
 def handle_webhook_event(event: str, payload: dict[str, Any]) -> str:
     """
     Dispatch a verified webhook event.
@@ -55,12 +95,12 @@ def handle_webhook_event(event: str, payload: dict[str, Any]) -> str:
     """
     action = str(payload.get("action") or "")
 
+    if event == "ping":
+        return "pong"
     if event == "installation":
         return _handle_installation(action, payload)
     if event == "installation_repositories":
         return _handle_installation_repositories(action, payload)
-    if event == "ping":
-        return "pong"
 
     logger.info("Ignored GitHub webhook event=%s action=%s", event, action)
     return "ignored"

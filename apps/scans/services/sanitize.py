@@ -12,6 +12,8 @@ _SECRET_PATTERNS = (
     re.compile(r"https?://[^:\s]+:[^@\s]+@"),
     re.compile(r"(?i)\b(gh[pousr]_[A-Za-z0-9_]{20,})\b"),
     re.compile(r"(?i)\b(github_pat_[A-Za-z0-9_]{20,})\b"),
+    # Fernet ciphertext accidentally embedded in messages.
+    re.compile(r"\bgAAAAA[A-Za-z0-9_\-]{20,}\b"),
 )
 
 
@@ -31,6 +33,7 @@ def sanitize_error_message(text: str, *, max_length: int = 2000) -> str:
     cleaned = _SECRET_PATTERNS[3].sub("https://***:***@", cleaned)
     cleaned = _SECRET_PATTERNS[4].sub("***", cleaned)
     cleaned = _SECRET_PATTERNS[5].sub("***", cleaned)
+    cleaned = _SECRET_PATTERNS[6].sub("***", cleaned)
 
     # Collapse noisy whitespace for UI readability.
     cleaned = re.sub(r"[ \t]+", " ", cleaned)

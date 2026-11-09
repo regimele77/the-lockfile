@@ -44,10 +44,21 @@
     {% endif %}
   </dl>
 
-  {% if scan.status == "failed" and scan.error_message %}
+  {% if scan.status == "failed" and safe_error_message %}
   <div class="notice mt-4">
     <p class="type-caption">Error</p>
-    <p class="mt-2 whitespace-pre-wrap text-ink">{{ scan.error_message }}</p>
+    <p class="mt-2 whitespace-pre-wrap text-ink">{{ safe_error_message }}</p>
+    {% if recovery and recovery.is_permission_related %}
+    <div class="mt-3 flex flex-wrap gap-2">
+      {% if recovery.primary_url and recovery.primary_label %}
+      <a href="{{ recovery.primary_url }}" class="btn-secondary btn-sm" rel="noopener noreferrer">{{ recovery.primary_label }}</a>
+      {% endif %}
+      {% if recovery.secondary_url and recovery.secondary_label %}
+      <a href="{{ recovery.secondary_url }}" class="btn-secondary btn-sm" rel="noopener noreferrer">{{ recovery.secondary_label }}</a>
+      {% endif %}
+      <a href="{% url 'accounts:profile' %}" class="btn-secondary btn-sm">Account settings</a>
+    </div>
+    {% endif %}
   </div>
   {% elif scan.status == "completed" %}
   <p class="mt-4 text-sm text-ink-muted">

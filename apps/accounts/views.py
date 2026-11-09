@@ -9,8 +9,14 @@ from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic import TemplateView
 
 from apps.accounts.models import GitHubInstallation
+from apps.accounts.services.access_errors import (
+    classify_exception,
+    classify_message,
+    connection_health,
+)
 from apps.accounts.services.auth import (
     record_installation,
     sync_installations_for_user,
@@ -18,9 +24,23 @@ from apps.accounts.services.auth import (
 )
 from apps.accounts.services.github import GitHubAppError, GitHubOAuthClient
 from apps.accounts.services.installation_tokens import app_credentials_configured
+from apps.accounts.services.secrets import TokenEncryptionError
 from apps.repositories.services.sync import sync_repositories_for_user
+from apps.scans.services.sanitize import sanitize_error_message
 
 logger = logging.getLogger(__name__)
+
+
+def _flash_access_failure(request, exc_or_text, *, level="warning") -> None:
+    """Flash a classified recovery message without leaking secrets."""
+    if isinstance(exc_or_text, BaseException):
+        guidance = classify_exception(exc_or_text)
+    else:
+        guidance = classify_message(sanitize_error_message(str(exc_or_text)))
+    text = guidance.message
+    if guidance.primary_label and guidance.primary_url:
+        text = f"{text} Next: {guidance.primary_label}."
+    getattr(messages, level)(request, text)
 
 
 def _try_sync_repositories(request, user) -> None:
@@ -31,18 +51,19 @@ def _try_sync_repositories(request, user) -> None:
         return
     try:
         result = sync_repositories_for_user(user)
-    except GitHubAppError as exc:
-        messages.warning(request, str(exc))
+    except (GitHubAppError, TokenEncryptionError) as exc:
+        _flash_access_failure(request, exc, level="warning")
         return
     if result.errors:
         for err in result.errors:
-            messages.warning(request, err)
+            _flash_access_failure(request, err, level="warning")
     elif result.upserted:
         messages.info(
             request,
             f"Synced {result.upserted} repositories from GitHub. "
             "Choose which to track on Connect repositories.",
         )
+
 
 OAUTH_STATE_SESSION_KEY = "github_oauth_state"
 INSTALL_STATE_SESSION_KEY = "github_install_state"
@@ -124,6 +145,14 @@ class GithubOAuthCallbackView(View):
             user = upsert_user_from_github(profile, token)
             installations = client.list_installations(token.access_token)
             sync_installations_for_user(user, installations)
+        except TokenEncryptionError:
+            logger.warning("GitHub OAuth token encryption failed", exc_info=False)
+            messages.error(
+                request,
+                "Could not store GitHub credentials. Set GITHUB_TOKEN_FERNET_KEY "
+                "in .env (see README), restart Compose, and try again.",
+            )
+            return redirect("accounts:github")
         except GitHubAppError:
             logger.warning("GitHub OAuth callback failed", exc_info=False)
             messages.error(
@@ -209,7 +238,10 @@ class GithubInstallStartView(LoginRequiredMixin, View):
     def get(self, request):
         client = GitHubOAuthClient()
         if not settings.GITHUB_APP_NAME:
-            messages.error(request, "GITHUB_APP_NAME is not set.")
+            messages.error(
+                request,
+                "GITHUB_APP_NAME is not set. An operator must configure the App slug.",
+            )
             return redirect("repositories:connect")
         install_state = secrets.token_urlsafe(32)
         request.session[INSTALL_STATE_SESSION_KEY] = install_state
@@ -218,3 +250,16 @@ class GithubInstallStartView(LoginRequiredMixin, View):
         except GitHubAppError:
             messages.error(request, "Could not start GitHub App installation.")
             return redirect("repositories:connect")
+
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    """Account / GitHub connection health (settings-lite)."""
+
+    template_name = "accounts/profile.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        health = connection_health(self.request.user)
+        context.update(health)
+        context["page_title"] = "Account"
+        return context

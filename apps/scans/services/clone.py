@@ -123,7 +123,25 @@ def clone_repository(
         if not detail:
             detail = (
                 "git returned a non-zero exit code. "
-                "Ensure the App has Contents: Read and is installed on this repo."
+                "Ensure the App has Contents: Read, is installed on this repo, "
+                "and the repo is still in the installation selection."
+            )
+        # Prefer a stable permission message when git stderr looks like auth denial.
+        lowered = detail.lower()
+        if any(
+            marker in lowered
+            for marker in (
+                "authentication failed",
+                "could not read username",
+                "repository not found",
+                "permission denied",
+                "write access to repository not granted",
+            )
+        ):
+            raise CloneError(
+                "Clone failed: permission denied. Confirm Contents: Read, "
+                "that the App is installed on this repository, and refresh "
+                "repositories if the repo was removed from the installation."
             )
         raise CloneError(f"Clone failed: {detail}")
 

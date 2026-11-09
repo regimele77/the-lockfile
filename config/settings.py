@@ -116,6 +116,10 @@ GITHUB_OAUTH_CALLBACK_URL = env(
     "GITHUB_OAUTH_CALLBACK_URL",
     default="http://localhost:8000/accounts/github/callback/",
 )
+# Fernet key for encrypting GitHubAccount.access_token at rest.
+# Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Required outside DEBUG. Do not derive silently from DJANGO_SECRET_KEY.
+GITHUB_TOKEN_FERNET_KEY = env("GITHUB_TOKEN_FERNET_KEY", default="")
 
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=REDIS_URL)

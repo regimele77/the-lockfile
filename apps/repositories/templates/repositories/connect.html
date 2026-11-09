@@ -37,14 +37,25 @@
 
 {% if not app_credentials_ready %}
 <div class="notice mb-4">
-  <p>
+  <p class="notice-title">App credentials missing</p>
+  <p class="mt-2">
     App ID and private key are required to list repositories. Set
     <code class="type-mono">GITHUB_APP_ID</code> and
     <code class="type-mono">GITHUB_APP_PRIVATE_KEY</code> (or path) in
     <code class="type-mono">.env</code>, then refresh.
   </p>
+  <p class="mt-2">
+    <a href="{{ profile_url }}">Account settings</a>
+  </p>
 </div>
 {% endif %}
+
+<div class="mb-4 flex flex-wrap gap-3 text-sm text-ink-muted">
+  <span>Access problems?</span>
+  <a href="{{ reconnect_url }}">Re-connect GitHub</a>
+  <a href="{{ permissions_url }}" rel="noopener noreferrer" target="_blank">Accept App permissions</a>
+  <a href="{{ profile_url }}">Account settings</a>
+</div>
 
 {% if repositories %}
 <form id="connect-save-form" method="post" action="{% url 'repositories:connect' %}">

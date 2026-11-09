@@ -12,6 +12,7 @@ from django.db import IntegrityError
 from django.db.models import Max, Q
 from django.utils import timezone
 
+from apps.accounts.services.access_errors import classify_exception, classify_message
 from apps.accounts.services.github import GitHubAppError
 from apps.accounts.services.installation_tokens import (
     app_credentials_configured,
@@ -75,7 +76,10 @@ def run_scan(self, scan_id: int) -> str:
 
         installation = scan.repository.installation
         if installation is None:
-            raise CloneError("Repository has no GitHub App installation.")
+            raise CloneError(
+                "Repository has no GitHub App installation. "
+                "Re-install the App and refresh repositories."
+            )
 
         token = get_installation_access_token(installation.installation_id)
         workspace = prepare_scan_workspace(scan.pk)
@@ -102,7 +106,8 @@ def run_scan(self, scan_id: int) -> str:
         )
         return "completed"
     except (CloneError, GitHubAppError) as exc:
-        _fail_scan(scan, str(exc))
+        guidance = classify_exception(exc)
+        _fail_scan(scan, guidance.message if guidance.kind.value != "unknown" else str(exc))
         return "failed"
     except IntegrityError:
         logger.exception("Scan findings could not be saved scan_id=%s", scan_id)
@@ -121,9 +126,14 @@ def run_scan(self, scan_id: int) -> str:
 
 
 def _fail_scan(scan: Scan, message: str) -> None:
+    cleaned = sanitize_error_message(message)
+    guidance = classify_message(cleaned)
+    # Prefer classified recovery copy when the raw text is cryptic clone stderr.
+    if guidance.kind.value != "unknown":
+        cleaned = sanitize_error_message(guidance.message)
     scan.status = Scan.Status.FAILED
     scan.finished_at = timezone.now()
-    scan.error_message = sanitize_error_message(message)
+    scan.error_message = cleaned
     scan.save(update_fields=["status", "finished_at", "error_message"])
     logger.warning(
         "Scan failed scan_id=%s repository=%s",

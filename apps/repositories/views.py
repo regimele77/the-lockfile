@@ -5,6 +5,11 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.accounts.models import GitHubInstallation
+from apps.accounts.services.access_errors import (
+    classify_exception,
+    classify_message,
+    github_installations_settings_url,
+)
 from apps.accounts.services.github import GitHubAppError
 from apps.accounts.services.installation_tokens import app_credentials_configured
 from apps.repositories.models import Repository
@@ -12,6 +17,7 @@ from apps.repositories.services.sync import (
     sync_repositories_for_user,
     update_repository_selection,
 )
+from apps.scans.services.sanitize import sanitize_error_message
 
 
 class RepositoryListView(LoginRequiredMixin, ListView):
@@ -98,6 +104,9 @@ class RepositoryConnectView(LoginRequiredMixin, TemplateView):
                 "repositories": repositories,
                 "selected_count": selected_count,
                 "install_url": reverse("accounts:github_install"),
+                "reconnect_url": reverse("accounts:github_start"),
+                "profile_url": reverse("accounts:profile"),
+                "permissions_url": github_installations_settings_url(),
                 "app_credentials_ready": app_credentials_configured(),
             }
         )
@@ -118,26 +127,36 @@ class RepositoryConnectView(LoginRequiredMixin, TemplateView):
         if not GitHubInstallation.objects.filter(user=request.user).exists():
             messages.warning(
                 request,
-                "Install the GitHub App before refreshing repositories.",
+                "Install the GitHub App before refreshing repositories. "
+                "Next: Install GitHub App.",
             )
             return redirect("repositories:connect")
 
         if not app_credentials_configured():
-            messages.error(
-                request,
-                "Set GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY (or path) to sync repos.",
+            guidance = classify_message(
+                "GitHub App credentials are not configured. "
+                "Set GITHUB_APP_ID and private key."
             )
+            messages.error(request, f"{guidance.message} Next: Account settings.")
             return redirect("repositories:connect")
 
         try:
             result = sync_repositories_for_user(request.user)
         except GitHubAppError as exc:
-            messages.error(request, str(exc))
+            guidance = classify_exception(exc)
+            text = sanitize_error_message(guidance.message)
+            if guidance.primary_label:
+                text = f"{text} Next: {guidance.primary_label}."
+            messages.error(request, text)
             return redirect("repositories:connect")
 
         if result.errors:
             for err in result.errors:
-                messages.error(request, err)
+                guidance = classify_message(sanitize_error_message(err))
+                text = guidance.message
+                if guidance.primary_label:
+                    text = f"{text} Next: {guidance.primary_label}."
+                messages.error(request, text)
             if result.upserted:
                 messages.warning(
                     request,

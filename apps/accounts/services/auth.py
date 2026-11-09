@@ -59,7 +59,8 @@ def upsert_user_from_github(
 
     account.login = profile.login
     account.avatar_url = profile.avatar_url
-    account.access_token = token.access_token
+    # Encrypt at rest via set_access_token; never log the plaintext token.
+    account.set_access_token(token.access_token)
     account.token_type = token.token_type
     account.scope = token.scope
     account.save()

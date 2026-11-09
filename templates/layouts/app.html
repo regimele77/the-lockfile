@@ -27,6 +27,7 @@
 
       <div class="mt-auto border-t border-line pt-3">
         <p class="app-nav-label !pt-0">Account</p>
+        <a class="app-nav-link {% nav_active request 'accounts:profile' %}" href="{% url 'accounts:profile' %}">Settings</a>
         <a class="app-nav-link" href="{% url 'core:landing' %}">Marketing site</a>
         <form method="post" action="{% url 'accounts:logout' %}">
           {% csrf_token %}

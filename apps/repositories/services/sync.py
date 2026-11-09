@@ -232,10 +232,16 @@ def _authed_get_paginated(
             "GitHub installation repos HTTP error status=%s",
             exc.code,
         )
-        if exc.code in (401, 403):
+        if exc.code == 401:
             raise GitHubAppError(
-                "Missing permission to list repositories. "
-                "Ensure the App has Metadata: Read."
+                "GitHub returned HTTP 401 while listing repositories. "
+                "Re-install the App or check App credentials."
+            ) from exc
+        if exc.code == 403:
+            raise GitHubAppError(
+                "Missing permission to list repositories (HTTP 403). "
+                "Ensure the App has Metadata: Read, then accept new permissions "
+                "on the installation and refresh again."
             ) from exc
         raise GitHubAppError("GitHub API request failed.") from exc
     except urllib.error.URLError as exc:

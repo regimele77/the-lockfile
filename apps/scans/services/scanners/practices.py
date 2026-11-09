@@ -108,8 +108,9 @@ def scan_practices(*, scan: Scan) -> list[RawFinding]:
                 ),
                 recommendation=(
                     "Update the GitHub App permissions: Repository → Administration: "
-                    "Read-only (covers branch protection reads). Then reinstall or accept "
-                    "the new permissions for this installation and run another scan."
+                    "Read-only (covers branch protection reads). Then open the "
+                    "installation on GitHub, accept the new permissions, and run "
+                    "another scan. See Account settings for recovery links."
                 ),
                 rule_id="practice.permission_denied",
             )
