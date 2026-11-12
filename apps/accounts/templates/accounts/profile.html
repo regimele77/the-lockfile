@@ -81,4 +81,101 @@
     </div>
   </div>
 </div>
+
+{% if show_technical_config %}
+<div class="panel mt-6" data-tech-config>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <p class="type-caption">Software technical configurations</p>
+      <p class="mt-1 text-sm text-ink-muted">
+        Host-wide clone limits, scanner budgets, and schedule intervals.
+        Superuser only.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn-secondary btn-sm shrink-0"
+      aria-expanded="{% if technical_section_open %}true{% else %}false{% endif %}"
+      aria-controls="tech-config-panel"
+      data-tech-config-toggle
+    >
+      {% if technical_section_open %}Hide{% else %}Show{% endif %}
+    </button>
+  </div>
+
+  <div
+    id="tech-config-panel"
+    class="mt-5 border-t border-line pt-5 {% if not technical_section_open %}hidden{% endif %}"
+    data-tech-config-panel
+  >
+    <form method="post" class="space-y-6" novalidate>
+      {% csrf_token %}
+
+      {% if technical_form.non_field_errors %}
+      <div class="notice" role="alert">
+        {{ technical_form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      {% with f=technical_form %}
+      <div>
+        <p class="type-caption">Clone &amp; workspace</p>
+        <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {% include "accounts/partials/tech_field.html" with field=f.clone_timeout_seconds %}
+          {% include "accounts/partials/tech_field.html" with field=f.clone_depth %}
+          {% include "accounts/partials/tech_field.html" with field=f.max_repo_size_mb %}
+        </div>
+      </div>
+
+      <div class="border-t border-line pt-6">
+        <p class="type-caption">Scheduling</p>
+        <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {% include "accounts/partials/tech_field.html" with field=f.reschedule_hours %}
+          {% include "accounts/partials/tech_field.html" with field=f.schedule_check_hours %}
+        </div>
+      </div>
+
+      <div class="border-t border-line pt-6">
+        <p class="type-caption">Scanner limits</p>
+        <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {% include "accounts/partials/tech_field.html" with field=f.scanner_timeout_seconds %}
+          {% include "accounts/partials/tech_field.html" with field=f.max_findings_per_scanner %}
+          {% include "accounts/partials/tech_field.html" with field=f.max_file_bytes %}
+          {% include "accounts/partials/tech_field.html" with field=f.max_files %}
+          {% include "accounts/partials/tech_field.html" with field=f.osv_timeout_seconds %}
+          {% include "accounts/partials/tech_field.html" with field=f.osv_max_packages %}
+          {% include "accounts/partials/tech_field.html" with field=f.github_timeout_seconds %}
+        </div>
+      </div>
+
+      <div class="border-t border-line pt-6">
+        <p class="type-caption">Confirm save</p>
+        <div class="mt-3 max-w-md">
+          {% include "accounts/partials/tech_field.html" with field=f.confirm_password %}
+        </div>
+      </div>
+      {% endwith %}
+
+      <div class="flex justify-end border-t border-line pt-5">
+        <button type="submit" class="btn-primary">Save technical configurations</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const root = document.querySelector("[data-tech-config]");
+    if (!root) return;
+    const toggle = root.querySelector("[data-tech-config-toggle]");
+    const panel = root.querySelector("[data-tech-config-panel]");
+    if (!toggle || !panel) return;
+    toggle.addEventListener("click", function () {
+      const open = panel.classList.toggle("hidden") === false;
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.textContent = open ? "Hide" : "Show";
+    });
+  })();
+</script>
+{% endif %}
 {% endblock %}

@@ -9,10 +9,9 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from django.conf import settings
-
 from apps.accounts.services.github import GitHubAppError, USER_AGENT
 from apps.accounts.services.installation_tokens import get_installation_access_token
+from apps.core.services import technical_config as tech
 from apps.findings.models import Finding
 from apps.scans.models import Scan
 from apps.scans.services.scanners.common import new_budget, scanner_enabled
@@ -61,7 +60,7 @@ def scan_practices(*, scan: Scan) -> list[RawFinding]:
             )
         ]
 
-    timeout = float(getattr(settings, "SCANNER_GITHUB_TIMEOUT_SECONDS", 20))
+    timeout = tech.github_timeout_seconds()
     status, data = _get_branch_protection(
         owner=owner,
         repo=name,

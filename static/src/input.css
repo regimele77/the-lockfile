@@ -605,6 +605,36 @@
     border-radius: var(--radius-control);
   }
 
+  .app-avatar-fallback {
+    @apply inline-flex items-center justify-center text-[0.65rem] font-medium
+      uppercase text-ink-muted;
+  }
+
+  .app-account {
+    @apply relative min-w-0;
+  }
+
+  .app-account-trigger {
+    @apply flex min-w-0 max-w-56 cursor-pointer items-center gap-2.5 border border-transparent
+      bg-transparent px-1.5 py-1 text-left;
+    border-radius: var(--radius-control);
+    transition:
+      background-color var(--ease-ui),
+      border-color var(--ease-ui);
+  }
+
+  .app-account-trigger:hover,
+  .app-account-trigger[aria-expanded="true"] {
+    @apply border-line bg-paper;
+  }
+
+  .app-account-menu {
+    @apply absolute right-0 z-40 mt-1.5 flex w-52 flex-col gap-0.5 border border-line
+      bg-surface p-1.5;
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-soft);
+  }
+
   .lockfile-mark {
     @apply h-6 w-6 shrink-0 text-accent;
   }

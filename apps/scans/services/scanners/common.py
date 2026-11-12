@@ -11,6 +11,8 @@ from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 
+from apps.core.services import technical_config as tech
+
 logger = logging.getLogger(__name__)
 
 SKIP_DIR_NAMES = frozenset(
@@ -119,19 +121,19 @@ class ScannerBudget:
 
 
 def scanner_timeout_seconds() -> float:
-    return float(getattr(settings, "SCANNER_TIMEOUT_SECONDS", 120))
+    return tech.scanner_timeout_seconds()
 
 
 def scanner_max_findings() -> int:
-    return int(getattr(settings, "SCANNER_MAX_FINDINGS_PER_SCANNER", 50))
+    return tech.max_findings_per_scanner()
 
 
 def max_file_bytes() -> int:
-    return int(getattr(settings, "SCANNER_MAX_FILE_BYTES", 512_000))
+    return tech.max_file_bytes()
 
 
 def max_files() -> int:
-    return int(getattr(settings, "SCANNER_MAX_FILES", 8_000))
+    return tech.max_files()
 
 
 def new_budget() -> ScannerBudget:

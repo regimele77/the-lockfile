@@ -24,33 +24,50 @@
         <a class="app-nav-link {% nav_active request 'scans:list' 'scans:detail' %}" href="{% url 'scans:list' %}">Scans</a>
         <a class="app-nav-link {% nav_active request 'findings:list' 'findings:detail' %}" href="{% url 'findings:list' %}">Findings</a>
       </div>
-
-      <div class="mt-auto border-t border-line pt-3">
-        <p class="app-nav-label !pt-0">Account</p>
-        <a class="app-nav-link {% nav_active request 'accounts:profile' %}" href="{% url 'accounts:profile' %}">Settings</a>
-        <a class="app-nav-link" href="{% url 'core:landing' %}">Marketing site</a>
-        <form method="post" action="{% url 'accounts:logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="app-nav-link w-full text-left">Log out</button>
-        </form>
-      </div>
     </nav>
   </aside>
 
   <div class="app-content">
     <header class="app-topbar">
       {% if user.is_authenticated %}
-        <div class="flex min-w-0 items-center gap-2.5">
-          {% if user.github_account.avatar_url %}
-            <img
-              src="{{ user.github_account.avatar_url }}"
-              alt=""
-              width="28"
-              height="28"
-              class="app-avatar"
-            >
-          {% endif %}
-          <span class="truncate text-sm font-medium text-ink">{% firstof user.github_account.login user.get_username %}</span>
+        <div class="app-account" data-account-menu>
+          <button
+            type="button"
+            class="app-account-trigger"
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-controls="app-account-menu"
+            data-account-trigger
+          >
+            {% if user.github_account.avatar_url %}
+              <img
+                src="{{ user.github_account.avatar_url }}"
+                alt=""
+                width="28"
+                height="28"
+                class="app-avatar"
+              >
+            {% else %}
+              <span class="app-avatar app-avatar-fallback" aria-hidden="true">
+                {% firstof user.github_account.login user.get_username as account_label %}{{ account_label|slice:":1"|upper }}
+              </span>
+            {% endif %}
+            <span class="truncate text-sm font-medium text-ink">{% firstof user.github_account.login user.get_username %}</span>
+          </button>
+          <div
+            id="app-account-menu"
+            class="app-account-menu hidden"
+            role="menu"
+            aria-label="Account"
+            data-account-panel
+          >
+            <a class="app-nav-link {% nav_active request 'accounts:profile' %}" href="{% url 'accounts:profile' %}" role="menuitem">Settings</a>
+            <a class="app-nav-link" href="{% url 'core:landing' %}" role="menuitem">Marketing site</a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="app-nav-link w-full text-left" role="menuitem">Log out</button>
+            </form>
+          </div>
         </div>
       {% endif %}
     </header>
@@ -67,11 +84,36 @@
   (function () {
     const toggle = document.querySelector("[data-nav-toggle]");
     const nav = document.getElementById("app-nav");
-    if (!toggle || !nav) return;
-    toggle.addEventListener("click", function () {
-      const open = nav.classList.toggle("hidden") === false;
-      nav.classList.toggle("flex", open);
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (toggle && nav) {
+      toggle.addEventListener("click", function () {
+        const open = nav.classList.toggle("hidden") === false;
+        nav.classList.toggle("flex", open);
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+
+    const account = document.querySelector("[data-account-menu]");
+    if (!account) return;
+    const trigger = account.querySelector("[data-account-trigger]");
+    const panel = account.querySelector("[data-account-panel]");
+    if (!trigger || !panel) return;
+
+    function setOpen(open) {
+      panel.classList.toggle("hidden", !open);
+      trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    trigger.addEventListener("click", function (event) {
+      event.stopPropagation();
+      setOpen(panel.classList.contains("hidden"));
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!account.contains(event.target)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") setOpen(false);
     });
   })();
 </script>

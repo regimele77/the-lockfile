@@ -333,6 +333,9 @@
   .max-w-3xl {
     max-width: var(--container-3xl);
   }
+  .max-w-md {
+    max-width: var(--container-md);
+  }
   .min-w-0 {
     min-width: 0px;
   }
@@ -354,6 +357,9 @@
   .items-center {
     align-items: center;
   }
+  .items-start {
+    align-items: flex-start;
+  }
   .justify-between {
     justify-content: space-between;
   }
@@ -368,9 +374,6 @@
   }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
-  }
-  .gap-2\.5 {
-    gap: calc(var(--spacing) * 2.5);
   }
   .gap-3 {
     gap: calc(var(--spacing) * 3);
@@ -452,14 +455,8 @@
   .py-16 {
     padding-block: calc(var(--spacing) * 16);
   }
-  .\!pt-0 {
-    padding-top: 0px !important;
-  }
   .pt-1 {
     padding-top: var(--spacing);
-  }
-  .pt-3 {
-    padding-top: calc(var(--spacing) * 3);
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
@@ -509,6 +506,9 @@
   }
   .text-current {
     color: currentcolor;
+  }
+  .text-danger {
+    color: var(--color-danger);
   }
   .text-ink {
     color: var(--color-ink);
@@ -1483,6 +1483,58 @@
     background-color: var(--color-paper);
     object-fit: cover;
     border-radius: var(--radius-control);
+  }
+  .app-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+  }
+  .app-account {
+    position: relative;
+    min-width: 0px;
+  }
+  .app-account-trigger {
+    display: flex;
+    max-width: calc(var(--spacing) * 56);
+    min-width: 0px;
+    cursor: pointer;
+    align-items: center;
+    gap: calc(var(--spacing) * 2.5);
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+    border-color: transparent;
+    background-color: transparent;
+    padding-inline: calc(var(--spacing) * 1.5);
+    padding-block: var(--spacing);
+    text-align: left;
+    border-radius: var(--radius-control);
+    transition: background-color var(--ease-ui), border-color var(--ease-ui);
+  }
+  .app-account-trigger:hover, .app-account-trigger[aria-expanded="true"] {
+    border-color: var(--color-line);
+    background-color: var(--color-paper);
+  }
+  .app-account-menu {
+    position: absolute;
+    right: 0px;
+    z-index: 40;
+    margin-top: calc(var(--spacing) * 1.5);
+    display: flex;
+    width: calc(var(--spacing) * 52);
+    flex-direction: column;
+    gap: calc(var(--spacing) * 0.5);
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+    border-color: var(--color-line);
+    background-color: var(--color-surface);
+    padding: calc(var(--spacing) * 1.5);
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-soft);
   }
   .lockfile-mark {
     height: calc(var(--spacing) * 6);

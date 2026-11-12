@@ -12,6 +12,7 @@ from pathlib import Path
 
 from django.conf import settings
 
+from apps.core.services import technical_config as tech
 from apps.scans.services.sanitize import sanitize_error_message
 
 logger = logging.getLogger(__name__)
@@ -76,8 +77,8 @@ def clone_repository(
 
     destination.mkdir(parents=True, exist_ok=True)
     public_url = f"https://github.com/{full_name}.git"
-    depth = max(1, int(settings.SCAN_CLONE_DEPTH))
-    timeout = max(30, int(settings.SCAN_CLONE_TIMEOUT_SECONDS))
+    depth = tech.clone_depth()
+    timeout = tech.clone_timeout_seconds()
 
     logger.info(
         "Cloning repository full_name=%s depth=%s timeout=%s",
@@ -196,12 +197,12 @@ def _run_clone(
     except subprocess.TimeoutExpired as exc:
         raise CloneError(
             f"Clone timed out after {timeout} seconds. Try a smaller repository "
-            "or raise SCAN_CLONE_TIMEOUT_SECONDS."
+            "or raise the clone timeout in Account settings."
         ) from exc
 
 
 def _enforce_size_limit(path: Path) -> None:
-    max_mb = int(settings.SCAN_MAX_REPO_SIZE_MB)
+    max_mb = tech.max_repo_size_mb()
     if max_mb <= 0:
         return
     max_bytes = max_mb * 1024 * 1024
@@ -215,7 +216,8 @@ def _enforce_size_limit(path: Path) -> None:
             if total > max_bytes:
                 raise CloneError(
                     f"Cloned repository exceeds the size limit of {max_mb} MB. "
-                    "Raise SCAN_MAX_REPO_SIZE_MB if this repo should be allowed."
+                    "Raise max repository size in Account settings if this repo "
+                    "should be allowed."
                 )
 
 

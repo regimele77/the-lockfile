@@ -25,6 +25,8 @@ from apps.accounts.services.auth import (
 from apps.accounts.services.github import GitHubAppError, GitHubOAuthClient
 from apps.accounts.services.installation_tokens import app_credentials_configured
 from apps.accounts.services.secrets import TokenEncryptionError
+from apps.core.forms import TechnicalConfigurationForm
+from apps.core.models import TechnicalConfiguration
 from apps.repositories.services.sync import sync_repositories_for_user
 from apps.scans.services.sanitize import sanitize_error_message
 
@@ -262,4 +264,42 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         health = connection_health(self.request.user)
         context.update(health)
         context["page_title"] = "Account"
+        context["show_technical_config"] = self.request.user.is_superuser
+        if self.request.user.is_superuser and "technical_form" not in context:
+            context["technical_form"] = TechnicalConfigurationForm(
+                instance=TechnicalConfiguration.load(),
+                user=self.request.user,
+            )
+        context["technical_section_open"] = context.get(
+            "technical_section_open", False
+        )
         return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            messages.error(
+                request,
+                "Only a superuser can change software technical configurations.",
+            )
+            return redirect("accounts:profile")
+
+        form = TechnicalConfigurationForm(
+            request.POST,
+            instance=TechnicalConfiguration.load(),
+            user=request.user,
+        )
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                "Software technical configurations saved. "
+                "Schedule check interval changes need a Celery beat restart.",
+            )
+            return redirect("accounts:profile")
+
+        messages.error(request, "Could not save technical configurations.")
+        context = self.get_context_data(
+            technical_form=form,
+            technical_section_open=True,
+        )
+        return self.render_to_response(context)

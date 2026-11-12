@@ -7,12 +7,12 @@ from datetime import timedelta
 from pathlib import Path
 
 from celery import shared_task
-from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Max, Q
 from django.utils import timezone
 
 from apps.accounts.services.access_errors import classify_exception, classify_message
+from apps.core.services import technical_config as tech
 from apps.accounts.services.github import GitHubAppError
 from apps.accounts.services.installation_tokens import (
     app_credentials_configured,
@@ -151,7 +151,7 @@ def enqueue_due_scans() -> int:
     - has never been scanned, or
     - its latest finished scan is older than SCAN_RESCHEDULE_HOURS.
     """
-    hours = max(1, int(settings.SCAN_RESCHEDULE_HOURS))
+    hours = tech.reschedule_hours()
     cutoff = timezone.now() - timedelta(hours=hours)
     enqueued = 0
 

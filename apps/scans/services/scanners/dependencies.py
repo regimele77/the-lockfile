@@ -10,8 +10,7 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-from django.conf import settings
-
+from apps.core.services import technical_config as tech
 from apps.findings.models import Finding
 from apps.scans.services.scanners.common import (
     iter_workspace_files,
@@ -69,8 +68,8 @@ def scan_dependencies(*, workspace: Path) -> list[RawFinding]:
         return []
 
     # Cap advisory lookups.
-    max_query = int(getattr(settings, "SCANNER_OSV_MAX_PACKAGES", 200))
-    packages = packages[: max(1, max_query)]
+    max_query = tech.osv_max_packages()
+    packages = packages[:max_query]
 
     if not scanner_enabled("SCANNER_OSV_ENABLED", True):
         return [
@@ -418,7 +417,7 @@ def _query_osv(packages: list[PackageRef]) -> dict[tuple[str, str, str], list[di
     Query OSV querybatch. On network failure, return empty and log.
     Result keyed by (ecosystem, name.lower(), version).
     """
-    timeout = float(getattr(settings, "SCANNER_OSV_TIMEOUT_SECONDS", 30))
+    timeout = tech.osv_timeout_seconds()
     # Batch in chunks to keep payloads reasonable.
     result: dict[tuple[str, str, str], list[dict]] = {}
     chunk_size = 80

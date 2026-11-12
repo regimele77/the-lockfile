@@ -1,0 +1,6 @@
+<div class="form-group">
+  <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+  {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+  {% if field.errors %}<p class="mt-1.5 text-xs text-danger">{{ field.errors|striptags }}</p>{% endif %}
+</div>
